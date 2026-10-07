@@ -43,6 +43,15 @@
     text-shadow: 8px 8px 0 #00f, 16px 16px 0 #f00, 24px 24px 0 #0f0;
     animation: wobble .4s ease-in-out infinite alternate, hue 1s linear infinite;
   }
+  h1 .gsom { display: inline-block; position: relative; font-size: 1.45em; letter-spacing: .04em; }
+  h1 .ee {
+    position: absolute; right: -.9em; top: -.1em; font-size: .28em; padding: .05em .25em; transform: rotate(14deg);
+    color: #fff; background: #f00; -webkit-text-stroke: 0; text-shadow: 3px 3px 0 #000; border: 4px solid #ff0;
+  }
+  .expand, .tagline { display: block; margin: 10px auto 0; max-width: 92vw; -webkit-text-stroke: 0; text-shadow: none; font-size: clamp(13px, 2.2vw, 26px); line-height: 1.2; }
+  .expand { color: #ff0; background: #00f; padding: 4px 12px; transform: rotate(2deg); border: 3px dashed #ff0; }
+  .expand b { color: #0f0; font-size: 1.25em; }
+  .tagline { width: fit-content; color: #000; background: #0f0; padding: 2px 10px; transform: rotate(-1deg); font-style: italic; }
   @keyframes wobble { from { transform: rotate(-6deg) scale(1); } to { transform: rotate(6deg) scale(1.12); } }
   @keyframes hue { to { filter: hue-rotate(360deg); } }
   .sub {
@@ -286,6 +295,9 @@
     .center { padding-top: 14dvh; }
     h1 { font-size: clamp(34px, 13vw, 80px); -webkit-text-stroke: 2px #f0f; text-shadow: 4px 4px 0 #00f, 8px 8px 0 #f00, 12px 12px 0 #0f0; }
     .sub { font-size: 13px; margin-top: 12px; }
+    .expand { font-size: 12px; margin-top: 8px; padding: 3px 8px; border-width: 2px; }
+    .tagline { font-size: 11px; margin-top: 6px; }
+    h1 .ee { border-width: 2px; }
     .review { width: calc(100vw - 12px); bottom: calc(var(--mq) + 6px + env(safe-area-inset-bottom, 0px)); font-size: 12px; padding: 5px 8px; border-width: 3px; }
     .controls {
       left: 6px; right: 6px; bottom: calc(var(--mq) + 62px + env(safe-area-inset-bottom, 0px));
@@ -311,6 +323,10 @@
     .sticker { font-size: 11px; padding: 3px 6px; }
     h1 { font-size: 14dvh; -webkit-text-stroke: 2px #f0f; text-shadow: 4px 4px 0 #00f, 8px 8px 0 #f00; }
     .sub { font-size: 12px; margin-top: 8px; }
+    .expand { font-size: 11px; margin-top: 4px; padding: 2px 8px; border-width: 2px; }
+    .tagline { display: none; }
+    h1 .gsom { font-size: 1.2em; }
+    h1 .ee { border-width: 2px; }
     .controls { bottom: calc(var(--mq) + 6px); flex-direction: row; flex-wrap: wrap; justify-content: flex-end; max-width: 70vw; }
     .controls button { font-size: 12px; padding: 3px 8px; }
     #popyach { font-size: 16px; padding: 5px 12px; }
@@ -382,7 +398,7 @@
 <div id="stage"></div>
 
 <div class="center">
-  <h1><span id="h1a">ПЛАТФОРМА</span><br><span id="h1b">ИИ ОЛОЛО</span><span class="sub" id="sub">мы навайбкодили платформу-ии-платформу</span></h1>
+  <h1><span class="gsom"><span id="h1a">GSOM</span><span class="ee" id="h1b">EE</span></span><span class="expand" id="gsomx">Glagne Synergy Orchestration Mesh — Upchk Enterprise Edition</span><span class="tagline">Popyachtso-as-a-Service для вашей глагне</span><span class="sub" id="sub">мы навайбкодили платформу-ии-платформу</span></h1>
 </div>
 
 <button id="popyach" type="button">ПОПЯЧЬСЯ</button>
@@ -714,6 +730,23 @@
     const r = Math.random();
     subEl.textContent = r < .15 ? maybeOlb(pick(PYTHON).toLowerCase()) : r < .3 ? maybeOlb(pick(ONOTOLE).toLowerCase()) : genPlatform();
   }, 2200);
+
+  // Расшифровка GSOM: сначала каноническая из README, потом каждые 3.5с новая абсурдная
+  const gsomEl = document.getElementById("gsomx");
+  const GSOM_WORDS = [
+    ["Glagne","Golden-path","Gartner-approved","Голактеко","Generative","GitOps","Гипер","Gigachad-free"],
+    ["Synergy","Self-service","Spam","Serverless","Спартанский","Shift-left","Stopitsot","Синк-по-синкам"],
+    ["Orchestration","Onotole","Ololo","Omni","Observability","Отаке","Олбанский","OKR-driven"],
+    ["Mesh","Monolith","Microservice","Министерство","Мжвячни","Manager","Metaverse","Мегасинергия"]];
+  const GSOM_TAIL = ["Upchk Enterprise Edition","Effective Manager Edition","Onotole Approved Edition","Спарта Edition",
+    "Стопицот Edition","Platform-as-a-Product Edition","Popyachtso Edition","Креведко Edition"];
+  function gsomShow(words, tail) {
+    gsomEl.textContent = "";
+    words.forEach((w, i) => { const b = document.createElement("b"); b.textContent = w[0]; gsomEl.append(b, w.slice(1) + (i < 3 ? " " : "")); });
+    gsomEl.append(" — " + maybeOlb(tail));
+  }
+  gsomShow(["Glagne","Synergy","Orchestration","Mesh"], "Upchk Enterprise Edition");
+  setInterval(() => gsomShow(GSOM_WORDS.map(pick), pick(GSOM_TAIL)), 3500);
 
   // ================= ЛОГ =================
   const logEl = document.getElementById("log");
@@ -1184,8 +1217,8 @@
   document.getElementById("olb").addEventListener("click", () => {
     olb = !olb;
     document.body.classList.toggle("olb", olb);
-    h1a.textContent = olb ? "ПЛАТФОРМО" : "ПЛАТФОРМА";
-    h1b.textContent = olb ? "ИИ АЛОЛО" : "ИИ ОЛОЛО";
+    h1a.textContent = olb ? "ЖСОМЪ" : "GSOM";
+    h1b.textContent = olb ? "ЕЕ!!!11" : "EE";
     flyers.forEach(f => setFlyText(f, flyText()));
     speak(olb ? "учи олбанский, аффтар" : "превед, великий и могучий");
     stamp(olb ? "АФФТАР ЖЖОТ" : "ЗАЧОТ", true);
