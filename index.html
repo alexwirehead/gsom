@@ -183,6 +183,22 @@
   .win .btns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 0 12px 12px; }
   .win button { font: inherit; padding: 4px 14px; border: 2px outset #fff; background: #c0c0c0; cursor: pointer; }
 
+  /* ---------- окна: игнор и уход ---------- */
+  .win.hung { filter: grayscale(.85); cursor: wait; animation: hung .35s ease-in-out infinite alternate; }
+  .win.hung .bar { background: linear-gradient(90deg, #808080, #b0b0b0); }
+  @keyframes hung { from { transform: rotate(-1.5deg); } to { transform: rotate(1.5deg); } }
+  .win[data-exit] { pointer-events: none; }
+  .win.x-fall { animation: winfall 1.1s ease-in forwards; }
+  .win.x-kick { animation: winkick .9s ease-in forwards; }
+  .win.x-sync { animation: winsync .8s ease-in forwards; }
+  .win.x-ufo { animation: winufo 1.2s ease-in forwards; }
+  .win.x-escal { animation: winescal 1s ease-in forwards; }
+  @keyframes winfall { 20% { transform: rotate(-8deg); } to { transform: translateY(110vh) rotate(35deg); } }
+  @keyframes winkick { to { transform: translate(130vw, -50vh) rotate(900deg); } }
+  @keyframes winsync { to { transform: scale(0) rotate(-200deg); opacity: 0; } }
+  @keyframes winufo { 30% { transform: translateY(10px) scale(1.05); } to { transform: translateY(-110vh) scale(.2) rotate(20deg); } }
+  @keyframes winescal { to { transform: translateY(-80vh) scale(.1); opacity: .2; } }
+
   /* ---------- УПЧК-амп ---------- */
   .amp { z-index: 14; left: 12px; top: calc(var(--mq) + 70px + 40dvh + 18px + env(safe-area-inset-top, 0px)); width: min(300px, 26vw); transform: rotate(-1deg); }
   .amp .screen { margin: 8px; background: #000; color: #0f0; font-family: "Courier New", monospace; font-weight: 700; border: 2px inset #fff; display: flex; align-items: center; gap: 8px; padding: 4px 6px; overflow: hidden; }
@@ -1035,6 +1051,7 @@
   });
 
   // ================= ОКНА =================
+  const ampWin = document.getElementById("amp");
   function makeWin(icon, msg, btns, onAny, note) {
     if (document.querySelectorAll(".win:not(.amp)").length >= (mobile() ? 3 : 7)) return;
     const w = document.createElement("div");
@@ -1064,9 +1081,41 @@
     w.append(bar, body, bb);
     w.style.visibility = "hidden";
     document.body.appendChild(w);
-    w.style.left = rnd(4, Math.max(4, W() - w.offsetWidth - 4)) + "px";
-    w.style.top = rnd(mq() + 4, Math.max(mq() + 4, H() - w.offsetHeight - mq() - 4)) + "px";
+    placeWin(w);
     w.style.visibility = "";
+    // окно, которое игнорируют, сначала «не отвечает», а потом уходит со спецэффектом
+    setTimeout(() => { if (!w.isConnected || w.dataset.exit) return; w.classList.add("hung"); ttl.textContent += " (Не отвечает)"; robot(); }, 7000);
+    setTimeout(() => { if (w.isConnected) winExit(w); }, 12000);
+  }
+  // ищем место, где окно не закрывает плеер и кнопки; не нашли за 15 попыток — ставим как получится
+  function placeWin(w) {
+    const avoid = [document.querySelector(".controls"), ampWin.hidden ? null : ampWin].filter(Boolean).map(e => e.getBoundingClientRect());
+    const ww = w.offsetWidth, wh = w.offsetHeight;
+    let x, y;
+    for (let i = 0; i < 15; i++) {
+      x = rnd(4, Math.max(4, W() - ww - 4));
+      y = rnd(mq() + 4, Math.max(mq() + 4, H() - wh - mq() - 4));
+      if (!avoid.some(r => x < r.right && x + ww > r.left && y < r.bottom && y + wh > r.top)) break;
+    }
+    w.style.left = x + "px"; w.style.top = y + "px";
+  }
+  const WIN_EXITS = [
+    ["fall", "ПОПЯЧТСО", () => fart()],
+    ["kick", "ЭТО СПАРТА!!!", () => { thud(); shake(); }],
+    ["sync", "УШЛО НА СИНК", () => { honk(); if (flyers.length < (mobile() ? 40 : 70)) makeFlyer(pick(MANAGER)); }],
+    ["ufo", "НЛО ЗАБРАЛО ОКНО", () => { theremin(); ufoFly(); }],
+    ["escal", "ЭСКАЛИРОВАНО НА ОНОТОЛЕ", () => onotoleVerdict()],
+    ["sync", "СПАМ СПАМ СПАМ", () => { honk(); speak("спам спам спам"); }]
+  ];
+  function winExit(w) {
+    if (w.dataset.exit) return;
+    const [kind, text, fx] = pick(WIN_EXITS);
+    w.dataset.exit = kind;
+    w.classList.add("x-" + kind);
+    const r = w.getBoundingClientRect();
+    boomAt(r.left + r.width / 2, r.top + r.height / 2, text);
+    fx();
+    setTimeout(() => w.remove(), 1200);
   }
   function moreChaos() { robot(); randomPopup(); if (Math.random() < .5) randomPopup(); cnt += 100000; makeFlyer(); }
   function randomPopup() {
@@ -1195,7 +1244,7 @@
   function loopStamps() { onotoleVerdict(); setTimeout(loopStamps, rnd(14000, 26000)); }
 
   // ================= УПЧК-АМП (окно) =================
-  const ampWin = document.getElementById("amp"), ampTitle = document.getElementById("ampTitle"), ampBtn = document.getElementById("ampPlay");
+  const ampTitle = document.getElementById("ampTitle"), ampBtn = document.getElementById("ampPlay");
   function ampUI() {
     ampTitle.textContent = `${amp.ti + 1}/${TRACKS.length}. ${TRACKS[amp.ti].name} ★ ${amp.on ? "ИГРАЕТ" : "ПАУЗА"} ★ ${TRACKS[amp.ti].bpm} BPM ★`;
     ampBtn.textContent = amp.on ? "⏸" : "▶";
