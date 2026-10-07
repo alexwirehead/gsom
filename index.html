@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ПЛАТФОРМА-ИИ-ПЛАТФОРМА!!!11</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💩</text></svg>">
+<style>
+  :root { --mq: 44px; --mqf: 26px; --gap: 12px; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; cursor: crosshair; overscroll-behavior: none; }
+  body {
+    font-family: "Comic Sans MS", "Comic Neue", "Chalkboard SE", cursive;
+    background: repeating-linear-gradient(45deg, #ff00ff 0 30px, #00ff00 30px 60px, #ffff00 60px 90px, #00ffff 90px 120px);
+    background-size: 170px 170px;
+    animation: bgmove 1.2s linear infinite;
+    color: #000; transition: transform .6s;
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none;
+  }
+  @keyframes bgmove { to { background-position: 170px 170px; } }
+  body.popyach { transform: scaleX(-1) rotate(180deg); }
+
+  /* ---------- бегущие строки ---------- */
+  .marquee {
+    position: fixed; left: 0; right: 0; height: var(--mq); overflow: hidden; z-index: 5;
+    background: #f00; color: #ff0; font-weight: 900; font-size: var(--mqf); line-height: calc(var(--mq) - 8px);
+    border-top: 4px dashed #00f; border-bottom: 4px dashed #00f; white-space: nowrap;
+  }
+  .marquee.top { top: env(safe-area-inset-top, 0px); }
+  .marquee.bot { bottom: env(safe-area-inset-bottom, 0px); background: #00f; color: #0f0; border-color: #f0f; }
+  .marquee span { display: inline-block; padding-left: 100%; animation: run 40s linear infinite; }
+  .marquee.bot span { animation-direction: reverse; animation-duration: 32s; }
+  @keyframes run { to { transform: translateX(-100%); } }
+
+  #stage { position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+  .fly { position: absolute; left: 0; top: 0; white-space: nowrap; font-weight: 900; text-shadow: 3px 3px 0 #000, -2px -2px 0 #fff; will-change: transform; }
+
+  /* ---------- заголовок ---------- */
+  .center { position: fixed; inset: 0; z-index: 3; display: grid; place-items: center; pointer-events: none; padding: 0 8px; }
+  h1 {
+    margin: 0; font-size: clamp(44px, 11vw, 150px); line-height: .9; text-align: center;
+    color: #ff0; -webkit-text-stroke: 4px #f0f;
+    text-shadow: 8px 8px 0 #00f, 16px 16px 0 #f00, 24px 24px 0 #0f0;
+    animation: wobble .4s ease-in-out infinite alternate, hue 1s linear infinite;
+  }
+  @keyframes wobble { from { transform: rotate(-6deg) scale(1); } to { transform: rotate(6deg) scale(1.12); } }
+  @keyframes hue { to { filter: hue-rotate(360deg); } }
+  .sub {
+    display: block; margin: 18px auto 0; max-width: 90vw; font-size: clamp(14px, 3vw, 32px); line-height: 1.15;
+    color: #fff; -webkit-text-stroke: 0; text-shadow: none;
+    background: #000; padding: 6px 14px; transform: rotate(-3deg); animation: blink .25s steps(2) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  body.silly h1 { animation: silly .5s steps(4) infinite, hue 1s linear infinite; }
+  @keyframes silly {
+    0%   { transform: translate(-30px, 0) skewX(20deg) rotate(-10deg); }
+    25%  { transform: translate(0, -40px) skewX(-25deg) scaleY(1.3); }
+    50%  { transform: translate(30px, 0) skewX(20deg) rotate(12deg); }
+    75%  { transform: translate(0, -60px) skewX(-35deg) scaleX(.7); }
+  }
+  body.razupl h1 { animation: razupl .12s steps(2) infinite; }
+  @keyframes razupl {
+    0%   { letter-spacing: .4em; filter: blur(4px) hue-rotate(90deg); transform: scale(1.3) skewY(10deg); opacity: .5; }
+    100% { letter-spacing: -.1em; filter: blur(0) hue-rotate(270deg); transform: scale(.8) skewY(-10deg); opacity: 1; }
+  }
+
+  /* ---------- пепякодэнс ---------- */
+  .pepyaka { position: fixed; z-index: 7; left: 50%; top: calc(var(--mq) + 2px + env(safe-area-inset-top, 0px)); width: 46px; margin-left: -23px; pointer-events: none; animation: bounce .25s ease-in-out infinite alternate; }
+  .pepyaka svg { display: block; width: 100%; stroke: #000; stroke-width: 4; stroke-linecap: round; fill: none; overflow: visible; }
+  .pepyaka .head { fill: #ff0; }
+  .pepyaka .armL { transform-origin: 30px 26px; animation: armL .25s ease-in-out infinite alternate; }
+  .pepyaka .armR { transform-origin: 30px 26px; animation: armR .3s ease-in-out infinite alternate; }
+  .pepyaka .legL { transform-origin: 30px 48px; animation: armR .25s ease-in-out infinite alternate; }
+  .pepyaka .legR { transform-origin: 30px 48px; animation: armL .25s ease-in-out infinite alternate; }
+  .pepyaka small { display: block; text-align: center; font-size: 9px; font-weight: 900; background: #fff; border: 2px solid #000; white-space: nowrap; margin: 2px -14px 0; }
+  @keyframes armL { from { transform: rotate(-70deg); } to { transform: rotate(50deg); } }
+  @keyframes armR { from { transform: rotate(60deg); } to { transform: rotate(-60deg); } }
+  @keyframes bounce { from { transform: translateY(0) rotate(-8deg); } to { transform: translateY(-8px) rotate(8deg); } }
+
+  /* ---------- стикеры ---------- */
+  .sticker { position: fixed; z-index: 6; font-weight: 900; padding: 6px 10px; font-size: 17px; top: calc(var(--mq) + var(--gap) + env(safe-area-inset-top, 0px)); }
+  .counter { right: 10px; background: #0ff; border: 5px ridge #f0f; transform: rotate(4deg); }
+  .new { left: 10px; background: #ff0; border: 5px groove #f00; transform: rotate(-5deg); animation: blink .5s steps(2) infinite; }
+
+  .panel { position: fixed; z-index: 6; top: calc(var(--mq) + 70px + env(safe-area-inset-top, 0px)); overflow: hidden; }
+  .about {
+    left: 12px; width: min(300px, 26vw); height: 40dvh;
+    background: #fff; border: 6px double #f00; padding: 8px 10px; transform: rotate(-2deg); font-size: 15px;
+  }
+  .about h2 { position: relative; z-index: 1; margin: -8px -10px 6px; padding: 8px 10px 4px; background: #fff; font-size: 19px; color: #f0f; text-decoration: underline wavy #0f0; }
+  .about h3 { margin: 12px 0 6px; font-size: 17px; color: #fff; background: #000; padding: 2px 6px; transform: rotate(-1deg); }
+  .about .scroll { animation: up 110s linear infinite; }
+  .about p { margin: 0 0 8px; }
+  @keyframes up { from { transform: translateY(0); } to { transform: translateY(-100%); } }
+
+  .log {
+    right: 12px; width: min(340px, 28vw); height: 40dvh;
+    background: #000; color: #0f0; font-family: "Courier New", monospace; font-size: 12px;
+    border: 5px outset #888; padding: 6px; transform: rotate(2deg);
+    display: flex; flex-direction: column; justify-content: flex-end;
+  }
+  .log div { white-space: pre-wrap; word-break: break-word; }
+  .log .err { color: #f33; } .log .warn { color: #ff0; } .log .py { color: #0ff; } .log .ono { color: #f0f; }
+
+  /* ---------- каменты падонкафф ---------- */
+  .comments {
+    position: fixed; z-index: 6; left: 12px; bottom: calc(var(--mq) + 14px + env(safe-area-inset-bottom, 0px));
+    width: min(300px, 26vw); height: min(26dvh, 230px); overflow: hidden;
+    background: #ffffe0; border: 5px dashed #00f; padding: 6px 8px; transform: rotate(1.5deg); font-size: 13px;
+    display: flex; flex-direction: column;
+  }
+  .comments h3 { margin: 0 0 4px; font-size: 15px; color: #f00; flex: none; }
+  .comments .list { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; }
+  .comments .c { border-top: 1px dotted #999; padding: 2px 0; }
+  .comments .c b { color: #00f; }
+
+  .review {
+    position: fixed; z-index: 6; left: 50%; bottom: calc(var(--mq) + 14px + env(safe-area-inset-bottom, 0px));
+    width: min(500px, 40vw); transform: translateX(-50%) rotate(-1deg);
+    background: #ff8000; border: 5px dotted #00f; padding: 8px 12px; font-size: 16px; font-weight: 700; text-align: center;
+  }
+  .review b { color: #fff; text-shadow: 2px 2px 0 #000; }
+
+  /* ---------- кнопки ---------- */
+  .controls {
+    position: fixed; z-index: 14; right: 12px; bottom: calc(var(--mq) + 14px + env(safe-area-inset-bottom, 0px));
+    display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  }
+  .controls button, #popyach { font: inherit; font-weight: 900; cursor: pointer; }
+  .controls button { font-size: 16px; background: #fff; border: 4px outset #f00; padding: 6px 10px; }
+  .controls .gen { background: #0f0; border-color: #f0f; transform: rotate(-3deg); }
+  .controls .walk { background: #ff0; border-color: #00f; transform: rotate(2deg); }
+  .controls .beams { background: #000; color: #0f0; border-color: #0f0; transform: rotate(-1deg); }
+  .controls .olb { background: #f0f; color: #ff0; border-color: #ff0; transform: rotate(3deg); }
+  body.silly .controls .walk, body.olb .controls .olb { background: #00f; color: #fff; }
+
+  #popyach {
+    position: fixed; z-index: 12; left: 0; top: 0; font-size: 26px;
+    background: #f00; color: #fff; border: 8px outset #ff0; padding: 10px 22px;
+    transition: left .15s, top .15s; animation: hue .5s linear infinite;
+  }
+
+  .emoji { position: fixed; z-index: 4; font-size: 64px; pointer-events: none; animation: spin 1.5s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .boom {
+    position: fixed; z-index: 15; pointer-events: none; font-weight: 900; font-size: 46px; white-space: nowrap;
+    -webkit-text-stroke: 2px #000; transform: translate(-50%, -50%); animation: boom .8s ease-out forwards;
+  }
+  @keyframes boom {
+    0% { transform: translate(-50%, -50%) scale(.2) rotate(0); opacity: 1; }
+    100% { transform: translate(-50%, -160%) scale(2.4) rotate(40deg); opacity: 0; }
+  }
+
+  /* лучи поноса (не понимай буквальне, %username%) */
+  .beam {
+    position: fixed; z-index: 14; height: 10px; margin-top: -5px; transform-origin: 0 50%; pointer-events: none; border-radius: 5px;
+    background: linear-gradient(90deg, rgba(0,255,0,0), #0f0 25%, #d4ff00 60%, #0f0);
+    box-shadow: 0 0 14px #0f0, 0 0 34px #0f0; animation: beamfade .6s ease-out forwards;
+  }
+  @keyframes beamfade { 0% { opacity: 1; height: 14px; } 100% { opacity: 0; height: 2px; } }
+
+  .stamp {
+    position: fixed; z-index: 16; left: 50%; top: 42%; pointer-events: none; white-space: nowrap;
+    padding: 8px 20px; border: 8px solid currentColor; background: rgba(255,255,255,.88);
+    font-family: Impact, "Arial Black", sans-serif; font-size: clamp(26px, 7vw, 72px); letter-spacing: .04em;
+    transform: translate(-50%, -50%) rotate(-12deg); animation: stampin .22s ease-in;
+  }
+  .stamp.ok { color: #080; } .stamp.bad { color: #c00; }
+  @keyframes stampin { from { transform: translate(-50%, -50%) rotate(-12deg) scale(3); opacity: 0; } }
+
+  /* ---------- окна 98 ---------- */
+  .win {
+    position: fixed; z-index: 13; width: min(330px, calc(100vw - 16px)); background: #c0c0c0; border: 3px outset #fff;
+    font-family: Tahoma, "MS Sans Serif", sans-serif; font-size: 14px; box-shadow: 6px 6px 0 #000;
+  }
+  .win .bar { background: linear-gradient(90deg, #000080, #1084d0); color: #fff; font-weight: 700; padding: 3px 6px; display: flex; justify-content: space-between; gap: 8px; }
+  .win .bar span { cursor: pointer; background: #c0c0c0; color: #000; padding: 0 6px; border: 2px outset #fff; }
+  .win .body { padding: 12px; display: flex; gap: 10px; align-items: center; }
+  .win .body i { font-size: 34px; font-style: normal; }
+  .win .body small { display: block; margin-top: 6px; color: #800; }
+  .win .btns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 0 12px 12px; }
+  .win button { font: inherit; padding: 4px 14px; border: 2px outset #fff; background: #c0c0c0; cursor: pointer; }
+
+  /* ---------- внезапные вставки ---------- */
+  .interrupt {
+    position: fixed; inset: 0; z-index: 25; display: grid; place-items: center; text-align: center; pointer-events: none;
+    padding: 20px; font-weight: 900; overflow: hidden;
+  }
+  .interrupt .small { display: block; font-size: .38em; margin-top: 16px; }
+  .interrupt.inq { background: #a00; color: #fff; font-size: clamp(30px, 8vw, 100px); animation: zoom .25s ease-out; text-shadow: 6px 6px 0 #000; }
+  .interrupt.diff { background: #000; color: #fff; font-family: Georgia, serif; font-size: clamp(22px, 5vw, 56px); }
+  .interrupt.diff em { display: block; margin-top: 20px; color: #ff0; font-style: normal; font-family: "Comic Sans MS", cursive; animation: wobble .3s infinite alternate; }
+  .interrupt.spam { background: #fff; color: #f00; display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 4px 14px; font-size: clamp(18px, 4vw, 42px); }
+  .interrupt.spam span:nth-child(3n) { color: #00f; } .interrupt.spam span:nth-child(5n) { color: #0a0; }
+  .interrupt.gal {
+    background: radial-gradient(#fff 1px, transparent 1.6px) 0 0 / 38px 38px, radial-gradient(#ff0 1px, transparent 1.6px) 19px 19px / 57px 57px, #00001a;
+    color: #0ff; font-size: clamp(30px, 8vw, 96px); text-shadow: 0 0 20px #0ff, 4px 4px 0 #f0f;
+  }
+  .interrupt.gal .small { color: #ff0; text-shadow: 2px 2px 0 #f00; }
+  .interrupt .ufo { position: absolute; top: 18%; left: -120px; font-size: 90px; animation: ufo 3.2s linear forwards; }
+  @keyframes ufo { 0% { left: -120px; transform: rotate(-12deg); } 50% { top: 30%; } 100% { left: 110vw; top: 12%; transform: rotate(12deg); } }
+  .interrupt.balet { background: #111; color: #fff; font-size: clamp(22px, 5.5vw, 60px); }
+  .interrupt .tv { display: inline-block; border: 14px solid #555; border-radius: 22px; padding: 18px 28px; background: #1c2440; box-shadow: inset 0 0 40px #000, 0 0 0 6px #333; }
+  .interrupt .tv span { display: block; font-size: 1.6em; animation: wobble .35s infinite alternate; }
+  .interrupt.zoh { background: #000; color: #0f0; }
+  .interrupt.zoh .flood { position: absolute; inset: 0; padding: 10px; font-family: "Courier New", monospace; font-size: clamp(12px, 2vw, 18px); font-weight: 400; text-align: left; word-break: break-all; opacity: .7; }
+  .interrupt.zoh .big { position: relative; font-size: clamp(34px, 9vw, 110px); color: #f00; background: #000; padding: 6px 16px; border: 6px solid #0f0; animation: blink .2s steps(2) infinite; }
+  @keyframes zoom { from { transform: scale(4) rotate(20deg); } to { transform: none; } }
+
+  #start { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(0,0,0,.78); cursor: pointer; padding: 16px; }
+  #start button {
+    font: inherit; font-size: clamp(26px, 7vw, 72px); font-weight: 900; padding: 20px 32px;
+    background: #f0f; color: #ff0; border: 10px outset #0f0; cursor: pointer;
+    animation: wobble .3s ease-in-out infinite alternate, hue .7s linear infinite;
+  }
+
+  .shake { animation: shake .15s linear 3; }
+  @keyframes shake { 25% { transform: translate(8px, -6px); } 50% { transform: translate(-8px, 6px); } 75% { transform: translate(6px, 8px); } }
+
+  /* ---------- планшет ---------- */
+  @media (max-width: 1000px) {
+    .about, .comments { width: 30vw; font-size: 12px; }
+    .log { width: 32vw; font-size: 11px; }
+    .review { width: min(420px, 34vw); font-size: 13px; }
+    .controls button { font-size: 14px; }
+    .emoji { font-size: 48px; }
+  }
+
+  /* ---------- телефон ---------- */
+  @media (max-width: 700px) {
+    :root { --mq: 32px; --mqf: 18px; --gap: 6px; }
+    .sticker { font-size: 11px; padding: 3px 6px; border-width: 3px; }
+    .counter { right: 6px; } .new { left: 6px; }
+    .pepyaka { width: 30px; margin-left: -15px; }
+    .pepyaka small { display: none; }
+    .panel { top: calc(var(--mq) + 40px + env(safe-area-inset-top, 0px)); width: calc(50vw - 10px); height: 22dvh; }
+    .about { left: 6px; font-size: 11px; padding: 5px 6px; border-width: 4px; transform: rotate(-1deg); }
+    .about h2 { font-size: 13px; margin: -5px -6px 3px; padding: 5px 6px 2px; }
+    .about h3 { font-size: 12px; }
+    .log { right: 6px; font-size: 9px; padding: 4px; border-width: 3px; transform: rotate(1deg); }
+    .comments { display: none; }
+    .center { padding-top: 14dvh; }
+    h1 { font-size: clamp(34px, 13vw, 80px); -webkit-text-stroke: 2px #f0f; text-shadow: 4px 4px 0 #00f, 8px 8px 0 #f00, 12px 12px 0 #0f0; }
+    .sub { font-size: 13px; margin-top: 12px; }
+    .review { width: calc(100vw - 12px); bottom: calc(var(--mq) + 6px + env(safe-area-inset-bottom, 0px)); font-size: 12px; padding: 5px 8px; border-width: 3px; }
+    .controls {
+      left: 6px; right: 6px; bottom: calc(var(--mq) + 62px + env(safe-area-inset-bottom, 0px));
+      flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px;
+    }
+    .controls button { font-size: 12px; padding: 4px 8px; border-width: 3px; }
+    #popyach { font-size: 17px; padding: 6px 14px; border-width: 5px; }
+    .emoji { font-size: 34px; }
+    .boom { font-size: 30px; }
+    .win { font-size: 13px; }
+    .interrupt .ufo { font-size: 56px; }
+  }
+
+  /* ---------- телефон боком ---------- */
+  @media (max-height: 520px) and (orientation: landscape) {
+    :root { --mq: 30px; --mqf: 16px; --gap: 4px; }
+    .about, .log, .review, .comments, .pepyaka small { display: none; }
+    .pepyaka { width: 26px; margin-left: -13px; }
+    .sticker { font-size: 11px; padding: 3px 6px; }
+    h1 { font-size: 14dvh; -webkit-text-stroke: 2px #f0f; text-shadow: 4px 4px 0 #00f, 8px 8px 0 #f00; }
+    .sub { font-size: 12px; margin-top: 8px; }
+    .controls { bottom: calc(var(--mq) + 6px); flex-direction: row; flex-wrap: wrap; justify-content: flex-end; max-width: 70vw; }
+    .controls button { font-size: 12px; padding: 3px 8px; }
+    #popyach { font-size: 16px; padding: 5px 12px; }
+    .emoji { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="marquee top"><span>★ ВЕЛИКИЙ ОНОТОЛЕ!!!11 ★ ПОПЯЧТСО!!! ★ ПЫЩЬ ПЫЩЬ ОЛОЛО Я ВОДИТЕЛЬ НЛО ★ НЛО — НИЗКО ЛЕТЯЩИЙ ОНОТОЛЕ ★ МЫ НАВАЙБКОДИЛИ ПЛАТФОРМУ ★ НЕ ДЕПЛОЙ УГ НА ГЛАГНЕ, %USERNAME%! ★ УПЯЧКА СЛЕДИТ ЗА ТОБОЙ!!! ★ НИКТО НЕ ЖДЁТ ИСПАНСКУЮ ИНКВИЗИЦИЮ ★ АФФТАР ЖЖОТ ★ ГОЛАКТЕКО ОПАСНОСТЕ ★ СПАМ СПАМ СПАМ ПЛАТФОРМА СПАМ ★ С.Р.П.!!! СВОБОДА! РАВЕНСТВО! ПЛАТФОРМА! ★</span></div>
+<div class="marquee bot"><span>☢ ИИ-ПЯНИ: МЕЛКИ, СОЧНИ, СЛАДКИ, МЖВЯЧНИ, РИАЛЬНЕ НЕЙРОСЕТЭ!!!111 ☢ ПЛАТФОРМА НА ЖЪРЧИКЕ ☢ ПРЕВЕД, МЕДВЕД, ЭТО DATA MESH ☢ ЖЕПЬ ЕБРИЛО ☢ ОНОТОЛЕ ОДОБРЯЕ ☢ МЫ РЫЦАРИ, ГОВОРЯЩИЕ «ИИ»! ☢ ЗАЧОТ ☢ КАГБЭ СИНЕРГИЯ ☢ ЕБАНУЛИСЬ НА ОТЛИЧНЕНЬКО ☢ А ТЫ ПРОБОВАЛ ЛИЗАТЬ ОКТАЭДР? ☢ МИНИСТЕРСТВО ГЛУПЫХ ДЕПЛОЕВ ☢ ПЕПЯКА +146 ☢</span></div>
+
+<div class="pepyaka" aria-hidden="true">
+  <svg viewBox="0 0 60 80">
+    <line class="legL" x1="30" y1="48" x2="18" y2="74"/>
+    <line class="legR" x1="30" y1="48" x2="42" y2="74"/>
+    <line x1="30" y1="20" x2="30" y2="48"/>
+    <line class="armL" x1="30" y1="26" x2="12" y2="40"/>
+    <line class="armR" x1="30" y1="26" x2="48" y2="40"/>
+    <circle class="head" cx="30" cy="12" r="8"/>
+  </svg>
+  <small>ПЕПЯКОДЭНС</small>
+</div>
+
+<div class="sticker new">НОВОЕ!!! ОНОТОЛЕ ВНУТРИ</div>
+<div class="sticker counter">Платформ: <span id="cnt">0</span></div>
+
+<div class="panel about">
+  <h2>КРЕАТИФФ: О ПЛАТФОРМЕ!!1</h2>
+  <div class="scroll">
+    <p>Мы разработали платформу. Потом мы навайбкодили на ней платформу. Потом платформа навайбкодила нам ИИ, а ИИ навайбкодил платформу. ИИИ.</p>
+    <p>Это облачно-нативная импортозамещённая low-code блокчейн-экосистема с ИИ, data mesh, lakehouse и болотом данных. Всё это на 1С. 1С — на Kubernetes. Kubernetes — в Excel. Excel — на ЖЪРЧИКЕ.</p>
+    <p>Архитектура: ИИ → платформа → суперапп → цифровой двойник цифрового двойника → котэ → глагне → прод.</p>
+    <p>Golden path ведёт строго в golden path. Кто свернул — попячтсо.</p>
+    <h3>ФАКТЫ ОБ ОНОТОЛЕ</h3>
+    <p>Великий Онотоле!!!11 — главный воен УПЧК и единственный, кто понимает, что делает наша платформа.</p>
+    <p>У Онотоле семь мозгов. Один из них — запасной Kubernetes-кластер.</p>
+    <p>Если упадёт весь интернет, Онотоле восстановит его из кэша за пару минут. Прод — за одну.</p>
+    <p>НЛО — Низко Летящий Онотоле.</p>
+    <p>Вселенная произошла из бороды Онотоле. Наша платформа — из одного волоска.</p>
+    <p>В жилетке Онотоле карманов больше, чем микросервисов в нашей платформе. А их стопицот.</p>
+    <p>Онотоле не читает документацию. Документация сама приходит к Онотоле за уточнениями.</p>
+    <p>Сквозь чочочки Онотоле видит все логи всех подов сразу.</p>
+    <p>Когда на глагне УГ — Онотоле негодуе. Когда деплой в пятницу — Онотоле серчае. Когда синергия — Онотоле торжествуе.</p>
+    <h3>ЗАКОНЫ УПЧК</h3>
+    <p>Не деплой УГ на глагне, %username%. Тупак будет разуплотнён лучами поноса.</p>
+    <p>Не понимай лучи поноса буквальне, %username%. Это просто зелёный лазер. Наверное.</p>
+    <p>Сервер упал? Смотри балет. Сервер поднялся? Пыщь!!!11адинадин.</p>
+    <p>FinOps сэкономил 3 рубля, потратив на это 3 миллиона. Пепяка отдела +146.</p>
+    <p>Roadmap: Q1 — платформа. Q2 — ИИ. Q3 — блокчейн. Q4 — колайдере. Q5 — квантовое импортозамещение. Q6 — попячтсо.</p>
+    <p>Наш легаси-монолит не мёртв. Он просто отдыхает. Он тоскует по фьордам.</p>
+    <p>Мы — рыцари, говорящие «ИИ!». Принесите нам кустарник. Нет, другой кустарник. С ИИ.</p>
+    <p>А теперь — нечто совершенно иное: платформа.</p>
+    <p>С.Р.П.!!! Свобода! Равенство! Платформа! И, ДА! МЫ ЕБАНУЛИСЬ НА ОТЛИЧНЕНЬКО!</p>
+  </div>
+</div>
+
+<div class="panel log" id="log"></div>
+
+<div class="comments"><h3>КАМЕНТЫ (стопицот)</h3><div class="list" id="comments"></div></div>
+
+<div class="review" id="review"></div>
+
+<div id="stage"></div>
+
+<div class="center">
+  <h1><span id="h1a">ПЛАТФОРМА</span><br><span id="h1b">ИИ ОЛОЛО</span><span class="sub" id="sub">мы навайбкодили платформу-ии-платформу</span></h1>
+</div>
+
+<button id="popyach" type="button">ПОПЯЧЬСЯ</button>
+
+<div class="controls">
+  <button class="gen" id="gen" type="button">🧩 сгенерировать платформу</button>
+  <button class="beams" id="beams" type="button">☄️ лучи поноса</button>
+  <button class="walk" id="walk" type="button">🥥 глупый деплой</button>
+  <button class="olb" id="olb" type="button">🔤 учи олбанский</button>
+  <button id="mute" type="button">🔊 звук</button>
+</div>
+
+<div id="start"><button type="button">ЖМИ ЧТОБ ПЫЩЬ 💨</button></div>
+
+<script>
+(() => {
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const W = () => window.innerWidth, H = () => window.innerHeight;
+  const mobile = () => W() <= 700;
+
+  // ================= ОЛБАНСКИЙ =================
+  let olb = false;
+  function olbanize(s) {
+    return s
+      .replace(/ться|тся/g, "цца").replace(/Ться|Тся/g, "Цца")
+      .replace(/жи/g, "жы").replace(/ши/g, "шы").replace(/ЖИ/g, "ЖЫ").replace(/ШИ/g, "ШЫ")
+      .replace(/ча/g, "чя").replace(/ща/g, "щя").replace(/ЧА/g, "ЧЯ")
+      .replace(/(^|[\s«-])я/g, "$1йа").replace(/(^|[\s«-])Я/g, "$1ЙА")
+      .replace(/ая(?=[\s,.!»-]|$)/g, "айа").replace(/АЯ(?=[\s,.!»-]|$)/g, "АЙА")
+      .replace(/ов(?=[\s,.!»-]|$)/g, "офф").replace(/ОВ(?=[\s,.!»-]|$)/g, "ОФФ")
+      .replace(/о/g, c => Math.random() < .45 ? "а" : c).replace(/О/g, c => Math.random() < .45 ? "А" : c)
+      .replace(/е/g, c => Math.random() < .25 ? "и" : c);
+  }
+  const maybeOlb = s => olb ? olbanize(s) : s;
+
+  // ================= ГЕНЕРАТОР БАЗЗВОРДОВ =================
+  const PRE = ["ИИ","Блокчейн","Low-code","No-code","Serverless","Квантово","Импортозамещённо","Нейро","Кибер","Мета",
+    "Гипер","Омни","Zero-Trust","Edge","Мультиклауд","Ололо","Спам","Web3","1С","Agile","Синерго","Облачно-нативно",
+    "Цифро","ГигаЧат","Попяч","Экосистемно","SAFe","Event-driven","API-first","Data-driven","Composable","Упячко","Онотоле",
+    "Мжвячни","Голактеко","Пыщь","Креведко","Жъркиче"];
+  const CORE = ["платформа","платформа платформ","суперапп","экосистема","data mesh","lakehouse","цифровой двойник",
+    "service mesh","IDP","озеро данных","болото данных","шина данных","ERP","портал","оркестратор","single pane of glass",
+    "golden path","облако","монолит на микросервисах","микросервис на монолите","CRM","дата-хаб","хаб хабов",
+    "центр компетенций","ESB","витрина данных","метавселенная","digital workplace","AI-агент","агент агентов","глагне","колайдере"];
+  const FOR = ["для платформ","для ИИ","для импортозамещения импортозамещения","на Kubernetes в Kubernetes","поверх Excel",
+    "на 1С","для синергии","для попячивания","для спама","для глупых деплоев","для рыцарей, говорящих «ИИ»",
+    "внутри платформы","для цифровой трансформации цифровой трансформации","в отдельном неймспейсе","для KPI",
+    "для отчёта наверх","без людей","для мёртвых попугаев","на блокчейне","в метавселенной","для котэ",
+    "с ИИ внутри ИИ","для дашборда про дашборды","для квартального OKR","в Jira","для креведок",
+    "одобренная Онотоле","для борьбы с УГ","на ЖЪРЧИКЕ","под присмотром Онотоле","для спасения голактеки",
+    "с лучами поноса","ф Бабруйске","для аффтаров","для глагне"];
+  const OPS = ["Dev","Sec","Fin","ML","AI","Git","Data","Biz","Chaos","Spam","Ололо","Ni","No","Click","Excel","Попяч","Vibe","LLM","Upchk","Onotole","Pyshch"];
+  const PITCH = ["Синергия +146%","Совместимо с YAML и Excel","Навайбкожено за выходные","Сертифицировано Котэ",
+    "Работает, пока никто не смотрит","Внутри ещё одна платформа","Спам, спам, ИИ и спам","Мёртвая, но она просто отдыхает",
+    "Одобрено Министерством глупых деплоев","Время внедрения: 3 года (ИИ сказал 3 дня)","Импортозамещает сама себя",
+    "Требует всего 46 микросервисов для Hello World","Zero Trust: не доверяет даже покупателю","Есть в Гартнере (мы нарисовали)",
+    "Онотоле одобряе","Пепяка +146","Мелки, сочни, мжвячни","Аффтар жжот","Масштабируется до стопицот"];
+
+  const opsName = () => [...OPS].sort(() => Math.random() - .5).slice(0, Math.floor(rnd(3, 7))).join("") + "Ops";
+  const prefix = () => Array.from({ length: Math.floor(rnd(1, 4)) }, () => pick(PRE)).join("-");
+  function genPlatform() {
+    const s = Math.random() < .18 ? `${opsName()}-платформа ${pick(FOR)}` : `${prefix()}-${pick(CORE)} ${pick(FOR)}`;
+    return maybeOlb(s);
+  }
+
+  // ================= ЛОР =================
+  const PHRASE = "платформа-ии-платформа-ии-платформа-платформа-платформ-";
+  const UPCHK = ["ПОПЯЧТСО!!!","ПЫЩЬ ПЫЩЬ ОЛОЛО Я ВОДИТЕЛЬ НЛО","ЙА КРЕВЕДКО","ЯЩЕТАЮ ЭТО ПЛАТФОРМА","ИИ ОЛОЛО ИИИ",
+    "ЖЫВТОНЕ ЧОЧО УПЯЧКА УПЯЧКА ШЯЧЛО ПОПЯЧТСА","УПЯЧКА СЛЕДИТ ЗА ТОБОЙ!!!","ЖЕПЬ ЕБРИЛО","ГОЛАКТЕКО ОПАСНОСТЕ",
+    "НЕ ДЕПЛОЙ УГ НА ГЛАГНЕ","ПОТС ЗОХВАЧЕН!!!","А ТЫ ПРОБОВАЛ ЛИЗАТЬ ОКТАЭДР?","КАГБЭ","ЕБАНУЛИСЬ НА ОТЛИЧНЕНЬКО",
+    "И, ДА! МЫ ЕБАНУЛИСЬ!","С.Р.У.!!! СВОБОДА! РАВЕНСТВО! УПЯЧКА!","СТОПИЦОТ","ПЕПЯКА +1","ПЕПЯКОДЭНС","ЖЪРЧИК","БЖНИ",
+    "ПЯНИ: МЕЛКИ, СОЧНИ, МЖВЯЧНИ","ЕЗЫК КОТЭ: ШЕРШАВЕ, МОКРЕ, СКЛЯВЖЧНЕ","ЖНЕЖНЕ","ЧЯПЬ-ЧЯПЬ","ПРДУНЬ-ПРДУНЬ","GSOM",
+    "РАЗУПЛОТНЕНИЕ","ОТАКЕ!!!","ЛУЧИ ПОНОСА","НЕ ПОНИМАЙ ЛУЧИ ПОНОСА БУКВАЛЬНЕ, %USERNAME%","СМОТРИ БАЛЕТ!1",
+    "КОЛАЙДЕРЕ","!!!11АДИНАДИН","КОТЭ ДЕПЛОИТ В ПРОД","ЧОЧО С ПЛАТФОРМОЙ?","ПОГЛАДЬ КОТЭ"];
+  const ONOTOLE = ["ВЕЛИКИЙ ОНОТОЛЕ!!!11","ОНОТОЛЕ ОДОБРЯЕ","ОНОТОЛЕ НЕГОДУЕ","ОНОТОЛЕ СЕРЧАЕ","ОНОТОЛЕ ТОРЖЕСТВУЕ",
+    "НЛО — НИЗКО ЛЕТЯЩИЙ ОНОТОЛЕ","ОНОТОЛЕ ЗНАЕТ","ОНОТОЛЕ КАГБЭ НАМЕКАЕТ","ОНОТОЛЕ СЛЕДИТ ЗА ТОБОЙ, %USERNAME%",
+    "У ОНОТОЛЕ 7 МОЗГОВ","ОНОТОЛЕ ВОССТАНОВИТ ПРОД ИЗ КЭША","ОНОТОЛЕ — ВЕЛИКЕ ВОЕНЕ УПЧК","ЧОЧОЧКИ ОНОТОЛЕ ВИДЯТ ВСЕ ЛОГИ"];
+  const PADONKI = ["АФФТАР ЖЖОТ","ЗАЧОТ","ПЕРВЫЙНАХ","КГ/АМ","ПРЕВЕД, МЕДВЕД","Ф БАБРУЙСК, ЖЫВОТНАЙЕ!","УЧИ ОЛБАНСКИЙ",
+    "РЖУНИМАГУ","МНОГАБУКАФ, НИАСИЛИЛ","АФФТАР, ПЕШИ ИСЧО","АЦЦКИЙ СОТОНА","КРОСАФЧЕГ","БУГОГА","АБАСАКА","ЙАЗВА","КРЕАТИФФ","ЖЖОШ"];
+  const PYTHON = ["СПАМ СПАМ СПАМ ПЛАТФОРМА СПАМ","НИКТО НЕ ЖДЁТ ИСПАНСКУЮ ИНКВИЗИЦИЮ","МЫ РЫЦАРИ, ГОВОРЯЩИЕ «ИИ»!",
+    "ПРИНЕСИТЕ НАМ КУСТАРНИК","ЭТО ВСЕГО ЛИШЬ ЦАРАПИНА","ЭТА ПЛАТФОРМА МЕРТВА","ОНА НЕ МЕРТВА, ОНА ОТДЫХАЕТ",
+    "ТОСКУЕТ ПО ФЬОРДАМ","МИНИСТЕРСТВО ГЛУПЫХ ДЕПЛОЕВ","А ТЕПЕРЬ — НЕЧТО СОВЕРШЕННО ИНОЕ","БЕЖИМ!!!",
+    "СЧИТАЙ ДО ТРЁХ, НЕ ДО ПЯТИ","ВЫНОСИТЕ МЁРТВЫЕ ПОДЫ","Я ЕЩЁ НЕ МЁРТВ (с) МОНОЛИТ","Я ПЕРДЮ В ВАШЕМ ОБЩЕМ НАПРАВЛЕНИИ",
+    "ТВОЯ МАТЬ БЫЛА ХОМЯКОМ","СКОРОСТЬ ПОЛЁТА НЕНАГРУЖЕННОГО ДЖУНА?","НИ! НИ! ИИ!"];
+  const COLORS = ["#ff0","#f0f","#0ff","#0f0","#f00","#00f","#fff","#ff8000"];
+  const EMOJI = ["💩","🤖","🚀","🔥","💨","🎺","🦐","☢️","🌈","🛸","👾","🧻","🐈","🦆","🥥","🦜","🐹","🌳","🦶","🛢️","📈","🧩","🧔","🐻","🍬","📺","🩰","🐟","🐱","🍿"];
+  const BOOMS = ["ПЫЩЬ!","ПРРРТ","ОЛОЛО","ИИ!!!","ФЬЮТЬ","ПЛАТФОРМА","БДЫЩЬ","ПОПЯЧТСО","ЖЖОШ","ИИИ","СПАМ!","НИ!","СИНЕРГИЯ",
+    "ЦАРАПИНА","БЕЖИМ!!!","ПРДУНЬ-ПРДУНЬ","ЧЯПЬ-ЧЯПЬ","GSOM","ОЯЕБУ","КАГБЭ","!!!11адинадин","ЗАЧОТ","ПРЕВЕД","ЖЕПЬ ЕБРИЛО","СТОПИЦОТ","ПЕПЯКА +1","ЖНЕЖНЕ"];
+  const REVIEWS = [
+    ["Котэ, CTO","ящетаю, это платформа. язык шершаве, мокре, склявжчне"],
+    ["Креведко, архитектор","йа креведко, а это ИИ-платформа платформ"],
+    ["Водитель НЛО, SRE","пыщь пыщь ололо, аптайм 146%"],
+    ["Наш ИИ","я навайбкодил платформу, которая навайбкодила меня. ИИИ"],
+    ["Король, Product Owner","мы искали Грааль, нашли data mesh. сойдёт"],
+    ["Чёрный рыцарь, прод","у меня отвалились все поды. это всего лишь царапина"],
+    ["Рыцари, говорящие «ИИ»","ИИ! ИИ! принесите нам кустарник и ещё один LLM"],
+    ["Испанская инквизиция, аудит ИБ","нас никто не ждал. и правильно"],
+    ["Министр глупых деплоев","деплою только вприпрыжку, иначе не синергично"],
+    ["Медвед, архитектор безопасности","ПРЕВЕД! я уже в вашем Zero Trust"],
+    ["Аццкий сотона, DBA","аццки одобряю ваш lakehouse на 1С"],
+    ["Воен УПЧК, тимлид","прошёл ревью у Онотоле. Онотоле одобряе. пыщь!!!11"],
+    ["Директор по цифровой трансформации","трансформировали трансформацию. теперь трансформируем её"],
+    ["Отдел FinOps","сэкономили 3 рубля. потратили 3 миллиона. пепяка +146"],
+    ["Инвестор","не понял ничего, но там было слово ИИ. беру стопицот"],
+    ["Джун Семён","задеплоил в пятницу в 18:59 — платформа сама попячилась"]
+  ];
+  const NICKS = ["Падонаг_Вася","Кросафчег","Аццкий_сотона","Медвед","Креведко","Ниасилил","Пеши_исчо","Бугога","Абасака",
+    "Жывотнайе","Албанец","Котэ","Воен_УПЧК","Йазва","%username%","Ъжслое","Пепякомэн","Фанат_Онотоле","Рыцарь_ИИ"];
+  const COMMENTS = ["первыйнах!!!","аффтар жжот, платформа зачот","КГ/АМ","ПРЕВЕД, платформа!","йа креведко, а это мой ИИ",
+    "многабукаф, ниасилил. дайте ИИ пересказать","аффтар, пеши исчо платформ!!!","бугога, синергия","абасака, зачот",
+    "ф Бабруйск, жывотнайе, со своим монолитом!","учи олбанский, ИИ","склявжчне. одобряе","ржунимагу с вашего Zero Trust",
+    "йазва, а не платформа. пепяка +1","а ты пробовал лизать октаэдр?","НЕ ДЕПЛОЙ УГ НА ГЛАГНЕ!!!11","креатифф зачотный, на главную",
+    "аццкий DevSecOps одобряе","Онотоле одобряе!!!11","Онотоле негодуе. где тесты?","спам спам спам яйца и спам","ни! ни! ни!",
+    "чочо с продом? смотри балет","пыщь!!!11адинадин","жепь ебрило, опять 1С","кросафчег, а helm-чарт где?","ОТАКЕ на конкурентов!!!"];
+  const LOG = [
+    ["","$ kubectl apply -f ii-platforma.yaml"],["","platforma.ii/ololo created"],
+    ["warn","WARN: ИИ обнаружил платформу внутри платформы"],
+    ["","$ terraform apply -var='synergy=146%'"],["err","ERROR: платформа попячилась (exit 146)"],
+    ["","$ claude vibecode --platforma --ii --ii --ii"],["","навайбкожено стопицот строк платформы"],
+    ["py",">>> import spam, spam, spam, eggs, spam"],["py",">>> platforma.is_dead()  # False, она отдыхает"],
+    ["","argocd: Synced ✔ Healthy ✔ Ололо ✔ Онотоле одобряе ✔"],["err","CrashLoopBackOff: pod/krevedko-7f9c — йа креведко"],
+    ["warn","— Выносите мёртвые поды! *дзынь*"],["warn","pod/legacy-monolit-0: я ещё не мёртв!"],
+    ["ono","ONOTOLE: прод восстановлен из кэша за 1 мин 46 сек"],
+    ["","$ kubectl get platforms --all-namespaces --all-universes"],["","1С: обновление конфигурации 87% (уже 3 года)"],
+    ["err","Zero Trust: доступ запрещён самому себе"],["","blockchain: блок подтверждён котэ"],
+    ["warn","WARN: УГ на глагне. Онотоле негодуе"],["err","OOMKilled: ИИ съел всю платформу"],
+    ["py",">>> raise SpanishInquisition  # никто не ожидал"],["","FinOps: счёт за облако = 1 спам"],
+    ["","$ helm install ministry-of-silly-deploys ./hop"],["warn","WARN: Ni! Ni! Ni! (rate limit от рыцарей)"],
+    ["err","503 Service Unavailable: смотри балет"],["","ОТАКЕ: лучи поноса направлены на легаси"],
+    ["","ПОТС ЗОХВАЧЕН (HTTP 146)"],["ono","ONOTOLE: голактеко в безопасносте"],
+    ["","$ rm -rf /monolit && echo ПОПЯЧТСО"],["err","ERROR: монолит говорит, что это всего лишь царапина"],
+    ["","pepyaka: +1 за деплой без падения (первый раз)"],["","платформа задеплоила платформу. платформ."]
+  ];
+  const STATIC_POPUPS = [
+    ["🤖","ИИ обнаружил платформу. Внедрить ещё ИИ?",["ДА","ТОЖЕ ДА"]],
+    ["💨","Ваша платформа навайбкодила новую платформу. Ололо?",["ОЛОЛО","ИИИ"]],
+    ["⚠️","Обнаружен монолит. Попячиться от него?",["ПОПЯЧТСО","ПЫЩЬ"]],
+    ["🦐","Йа креведко. Можно в прод?",["МОЖНО","НУЖНО"]],
+    ["🛸","Водитель НЛО запрашивает доступ к кластеру",["ПУСТИТЬ","ПЫЩЬ ПЫЩЬ"]],
+    ["🦜","Эта платформа мертва. Она перестала существовать.",["ОНА ОТДЫХАЕТ","ТОСКУЕТ ПО ФЬОРДАМ"]],
+    ["🌳","Мы рыцари, говорящие «ИИ»! Принесите нам кустарник.",["ПРИНЕСТИ","НИ!"]],
+    ["🕵️","Вы ожидали испанскую инквизицию?",["НЕТ","ТОЧНО НЕТ"],"inq"],
+    ["📈","Обнаружена синергия. Монетизировать?",["МОНЕТИЗИРОВАТЬ","СИНЕРГИРОВАТЬ"]],
+    ["🔒","Включить Zero Trust? Мы уже никому не доверяем.",["НЕ ДОВЕРЯТЬ","НЕ ДОВЕРЯТЬ СИЛЬНЕЕ"]],
+    ["🥫","Добавить в платформу спам?",["СПАМ","СПАМ СПАМ"],"spam"],
+    ["🧔","Онотоле негодуе: на глагне УГ. Попячиться?",["ПОПЯЧТСО","УГ, ПОПЯЧЬСЯ!"],"bad"],
+    ["🧔","Онотоле одобряе вашу платформу. Внедрить ещё?",["ВНЕДРИТЬ","ОНОТОЛЕ ТОРЖЕСТВУЕ"],"ok"],
+    ["🌌","Голактеко опасносте! Вызвать Онотоле?",["ВЫЗВАТЬ","ПЫЩЬ!!!11"],"gal"],
+    ["🍬","ИИ-ПЯНИ: мелки, сочни, сладки, мжвячни, риальне нейросетэ!111 Съесть?",["ЖРАТЬ","МЖВЯЧНИ"]],
+    ["📺","Сервер упал. Включить балет?",["СМОТРЕТЬ","СМОТРЕТЬ ВНИМАТЕЛЬНЕ"],"balet"],
+    ["✍️","Оцените креатифф аффтара платформы",["ЗАЧОТ","КГ/АМ"]],
+    ["🐻","ПРЕВЕД! Медвед просит доступ к прод-кластеру",["ПРЕВЕД","Ф БАБРУЙСК"]],
+    ["👁️","Упячка следит за тобой. Продолжить деплой?",["ДА-ДА!","КАГБЭ ДА"]],
+    ["☄️","Обнаружено УГ. Открыть огонь лучами поноса?",["ОТАКЕ!!!","ПЫЩЬ!!!11"],"beams"],
+    ["💥","Ваш пост захвачен. Сопротивление бесполезне.",["ОЯЕБУ","ЖЕПЬ ЕБРИЛО"],"zoh"]
+  ];
+  const SPEECH = ["попячтсо","пыщь пыщь ололо я водитель нло","платформа ии платформа","ии ололо иии",
+    "мы навайбкодили платформу","йа креведко","ящетаю это платформа","спам спам спам спам","синергия",
+    "никто не ждёт испанскую инквизицию","ни! ни! ни!","это всего лишь царапина","импортозамещение импортозамещения",
+    "великий онотоле","онотоле одобряе","онотоле негодуе","голактеко опасносте","упячка следит за тобой",
+    "аффтар жжот","превед медвед","зачот","не деплой уг на глагне","жепь ебрило","лучи поноса","смотри балет",
+    "пыщь адин адин адин","ебанулись на отличненько","а ты пробовал лизать октаэдр","стопицот"];
+
+  // ================= ЛЕТАЮЩИЙ ТЕКСТ =================
+  const stage = document.getElementById("stage");
+  const flyers = [];
+  let silly = false;
+  const fontScale = () => Math.max(.5, Math.min(1, W() / 1200));
+  function flyText() {
+    const r = Math.random();
+    let s;
+    if (r < .18) s = PHRASE.repeat(Math.floor(rnd(2, 5)));
+    else if (r < .40) s = pick(UPCHK);
+    else if (r < .52) s = pick(ONOTOLE);
+    else if (r < .62) s = pick(PADONKI);
+    else if (r < .76) s = pick(PYTHON);
+    else return genPlatform().toUpperCase();
+    return maybeOlb(s);
+  }
+  function makeFlyer(text) {
+    const el = document.createElement("div");
+    el.className = "fly";
+    el.textContent = text || flyText();
+    el.style.fontSize = rnd(14, 54) * fontScale() + "px";
+    el.style.color = pick(COLORS);
+    stage.appendChild(el);
+    flyers.push({ el, x: rnd(-W(), W()), y: rnd(0, H()),
+      vx: rnd(1.5, 7) * fontScale() * (Math.random() < .5 ? -1 : 1), vy: rnd(-1.2, 1.2),
+      rot: rnd(-30, 30), vr: rnd(-1.5, 1.5), wob: rnd(0, 6.28), ws: rnd(.02, .09) });
+  }
+  const baseCount = () => Math.round(Math.min(34, Math.max(12, (W() * H()) / 45000)));
+  for (let i = 0; i < baseCount(); i++) makeFlyer();
+
+  function tick() {
+    const w0 = W(), h0 = H();
+    for (const f of flyers) {
+      f.x += f.vx; f.rot += f.vr; f.wob += f.ws;
+      if (silly) {
+        f.vy += .6; f.y += f.vy;
+        if (f.y > h0 - 60) { f.y = h0 - 60; f.vy = -rnd(8, 18); }
+      } else {
+        f.y += f.vy + Math.sin(f.wob) * 2;
+        if (f.y < -80) f.y = h0; if (f.y > h0 + 80) f.y = -40;
+      }
+      const w = f.el.offsetWidth;
+      if (f.vx > 0 && f.x > w0 + 50) { f.x = -w; if (Math.random() < .35) f.el.textContent = flyText(); }
+      if (f.vx < 0 && f.x < -w - 50) { f.x = w0; if (Math.random() < .35) f.el.textContent = flyText(); }
+      f.el.style.transform = `translate(${f.x}px,${f.y}px) rotate(${f.rot}deg)`;
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+  setInterval(() => flyers.forEach(f => { f.el.style.color = pick(COLORS); }), 300);
+
+  // ================= ЭМОДЗИ =================
+  for (let i = 0; i < (mobile() ? 5 : 10); i++) {
+    const e = document.createElement("div");
+    e.className = "emoji";
+    const place = () => { e.style.left = rnd(0, 88) + "vw"; e.style.top = rnd(10, 78) + "vh"; e.textContent = pick(EMOJI); };
+    place();
+    e.style.animationDuration = rnd(.4, 2.5) + "s";
+    document.body.appendChild(e);
+    setInterval(place, rnd(700, 2000));
+  }
+
+  // ================= СЧЁТЧИК / ПОДЗАГОЛОВОК =================
+  let cnt = 0;
+  const cntEl = document.getElementById("cnt");
+  setInterval(() => {
+    cnt += Math.floor(rnd(1, 999));
+    cntEl.textContent = Math.random() < .08 ? "СТОПИЦОТ" : cnt.toLocaleString("ru-RU");
+  }, 120);
+
+  const subEl = document.getElementById("sub");
+  setInterval(() => {
+    const r = Math.random();
+    subEl.textContent = r < .15 ? maybeOlb(pick(PYTHON).toLowerCase()) : r < .3 ? maybeOlb(pick(ONOTOLE).toLowerCase()) : genPlatform();
+  }, 2200);
+
+  // ================= ЛОГ =================
+  const logEl = document.getElementById("log");
+  let li = 0;
+  setInterval(() => {
+    let cls, txt;
+    if (Math.random() < .25) { cls = ""; txt = `$ deploy ${genPlatform()}`; }
+    else [cls, txt] = LOG[li++ % LOG.length];
+    const d = document.createElement("div");
+    if (cls) d.className = cls;
+    d.textContent = txt;
+    logEl.appendChild(d);
+    while (logEl.children.length > 30) logEl.firstChild.remove();
+  }, 450);
+
+  // ================= КАМЕНТЫ =================
+  const comEl = document.getElementById("comments");
+  const randComment = () => [pick(NICKS), Math.random() < .2 ? `аффтар, а ${genPlatform()} будет?` : maybeOlb(pick(COMMENTS))];
+  setInterval(() => {
+    const [n, t] = randComment();
+    const d = document.createElement("div"); d.className = "c";
+    const b = document.createElement("b"); b.textContent = n + ": ";
+    d.append(b, t);
+    comEl.appendChild(d);
+    while (comEl.children.length > 14) comEl.firstChild.remove();
+  }, 900);
+
+  // ================= ОТЗЫВЫ (+ каменты на телефоне) =================
+  const reviewEl = document.getElementById("review");
+  let ri = 0;
+  function nextReview() {
+    const [who, what] = (Math.random() < .4) ? randComment() : REVIEWS[ri++ % REVIEWS.length];
+    reviewEl.innerHTML = "";
+    const b = document.createElement("b"); b.textContent = who + ": ";
+    reviewEl.append(b, "«" + what + "»");
+  }
+  nextReview(); setInterval(nextReview, 2800);
+
+  // ================= ЗВУК =================
+  let ctx = null, muted = false, noiseBuf = null;
+  const live = () => ctx && !muted;
+
+  function fart(rev) {
+    if (!live()) return;
+    const t = ctx.currentTime, dur = rnd(.35, 1.1);
+    const o = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain(), f = ctx.createBiquadFilter();
+    o.type = "sawtooth";
+    const a = rnd(70, 140), b = rnd(35, 60);
+    o.frequency.setValueAtTime(rev ? b : a, t);
+    o.frequency.exponentialRampToValueAtTime(rev ? a * 1.5 : b, t + dur);
+    lfo.frequency.value = rnd(18, 40); lg.gain.value = rnd(15, 35);
+    lfo.connect(lg); lg.connect(o.frequency);
+    f.type = "lowpass"; f.frequency.value = rnd(400, 900); f.Q.value = 6;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.5, t + .03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(f); f.connect(g); g.connect(ctx.destination);
+    o.start(t); lfo.start(t); o.stop(t + dur); lfo.stop(t + dur);
+  }
+  function sweep(type, f1, f2, dur, vol, vib) {
+    const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f1, t);
+    o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    if (vib) {
+      const v = ctx.createOscillator(), vg = ctx.createGain();
+      v.frequency.value = vib; vg.gain.value = f1 * .05; v.connect(vg); vg.connect(o.frequency);
+      v.start(t); v.stop(t + dur);
+    }
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + .02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(t); o.stop(t + dur + .01);
+  }
+  function whistle() {
+    if (!live()) return;
+    const up = Math.random() < .5;
+    sweep("sine", up ? rnd(600, 900) : rnd(1800, 2600), up ? rnd(1800, 2800) : rnd(500, 800), rnd(.3, .9), .25, rnd(6, 12));
+  }
+  function tone(type, freq, start, dur, vol) {
+    const t = ctx.currentTime + start, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + .01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(t); o.stop(t + dur + .01);
+  }
+  function honk() { if (!live()) return; [0, .18].forEach(d => tone("square", rnd(300, 420), d, .15, .18)); }
+  function robot() { if (!live()) return; for (let i = 0; i < 5; i++) tone("triangle", pick([220,330,440,660,880]), i * .08, .07, .15); }
+  function pew() { if (!live()) return; sweep("square", 1600, 120, .13, .15); setTimeout(() => live() && sweep("square", 1600, 120, .13, .15), 140); }
+  function laser() { if (!live()) return; sweep("sawtooth", rnd(2200, 3200), rnd(150, 300), .18, .08); }
+  function thud() { if (!live()) return; sweep("sine", 160, 40, .35, .6); }
+  function chord() {
+    if (!live()) return;
+    [[0, .22, [130.8,155.6,196]], [.28, .22, [130.8,155.6,196]], [.56, 1.1, [123.5,146.8,185,246.9]]]
+      .forEach(([s, d, fs]) => fs.forEach(f => tone("sawtooth", f, s, d, .09)));
+  }
+  function theremin() { if (!live()) return; sweep("sine", 380, 950, 1.4, .22, 6); setTimeout(() => live() && sweep("sine", 950, 300, 1.2, .2, 7), 1400); }
+  function musicBox() { // вальсок на три четверти
+    if (!live()) return;
+    const notes = [440, 554, 659, 880, 659, 554, 494, 587, 740, 587, 494, 440];
+    notes.forEach((n, i) => tone("triangle", n * (i % 3 === 0 ? 1 : 1), i * .22, .2, i % 3 === 0 ? .2 : .1));
+  }
+  function clop() {
+    if (!live()) return;
+    if (!noiseBuf) {
+      noiseBuf = ctx.createBuffer(1, ctx.sampleRate * .1, ctx.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / 300);
+    }
+    [0, .13].forEach((d, i) => {
+      const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+      s.buffer = noiseBuf; f.type = "bandpass"; f.frequency.value = i ? 1300 : 1900; f.Q.value = 5; g.gain.value = 1.2;
+      s.connect(f); f.connect(g); g.connect(ctx.destination);
+      s.start(ctx.currentTime + d);
+    });
+  }
+  function speak(text) {
+    if (muted || !("speechSynthesis" in window)) return;
+    const u = new SpeechSynthesisUtterance(text.replace(/%username%/gi, "юзернейм"));
+    u.lang = "ru-RU"; u.rate = rnd(.8, 1.6); u.pitch = rnd(0, 2);
+    speechSynthesis.speak(u);
+  }
+  function randomSound() {
+    const s = pick([fart, fart, fart, whistle, honk, pew, robot, laser]);
+    s();
+    if (s === fart && Math.random() < .5) randomBeam(); // лучи поноса сопровождают звук
+  }
+  function loopSounds() { randomSound(); setTimeout(loopSounds, rnd(400, 1500)); }
+  function loopSpeech() {
+    speak(Math.random() < .3 ? genPlatform() : pick(SPEECH));
+    setTimeout(loopSpeech, rnd(5000, 11000));
+  }
+
+  // ================= ВЗРЫВЫ / ЛУЧИ / ПЕЧАТИ =================
+  function boomAt(x, y, text) {
+    const b = document.createElement("div");
+    b.className = "boom";
+    b.textContent = text || pick(BOOMS);
+    b.style.left = x + "px"; b.style.top = y + "px"; b.style.color = pick(COLORS);
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), 800);
+  }
+  function shake() { document.body.classList.remove("shake"); void document.body.offsetWidth; document.body.classList.add("shake"); }
+  function edgePoint() {
+    const s = Math.floor(rnd(0, 4));
+    return s === 0 ? [rnd(0, W()), 0] : s === 1 ? [W(), rnd(0, H())] : s === 2 ? [rnd(0, W()), H()] : [0, rnd(0, H())];
+  }
+  function beam(x1, y1, x2, y2) {
+    const b = document.createElement("div");
+    b.className = "beam";
+    const dx = x2 - x1, dy = y2 - y1;
+    b.style.left = x1 + "px"; b.style.top = y1 + "px";
+    b.style.width = Math.hypot(dx, dy) + "px";
+    b.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), 650);
+  }
+  function randomBeam() { const [x, y] = edgePoint(); beam(x, y, rnd(0, W()), rnd(0, H())); }
+  function stamp(text, ok) {
+    document.querySelectorAll(".stamp").forEach(s => s.remove());
+    const s = document.createElement("div");
+    s.className = "stamp " + (ok ? "ok" : "bad");
+    s.textContent = text;
+    s.style.top = rnd(30, 60) + "%";
+    document.body.appendChild(s);
+    thud(); shake();
+    setTimeout(() => s.remove(), 1600);
+  }
+  const onotoleVerdict = () => Math.random() < .6 ? stamp("ОНОТОЛЕ ОДОБРЯЕ", true) : stamp(pick(["ОНОТОЛЕ НЕГОДУЕ", "ОНОТОЛЕ СЕРЧАЕ"]), false);
+
+  document.addEventListener("pointerdown", e => {
+    if (e.target.closest("#start, .controls, #popyach, .win")) return;
+    const [sx, sy] = edgePoint();
+    beam(sx, sy, e.clientX, e.clientY);
+    boomAt(e.clientX, e.clientY); shake(); randomSound();
+    if (flyers.length < (mobile() ? 40 : 70)) makeFlyer();
+  });
+
+  let last = 0;
+  document.addEventListener("pointermove", e => {
+    const now = performance.now();
+    if (now - last < (e.pointerType === "mouse" ? 40 : 90)) return; last = now;
+    const s = document.createElement("div");
+    s.className = "boom"; s.style.fontSize = "22px";
+    s.textContent = pick(["ИИ","💨","★","платформа","ололо","пыщь","спам","синергия","ни!","чочо","жнежне","зачот","1адин"]);
+    s.style.left = e.clientX + "px"; s.style.top = e.clientY + "px"; s.style.color = pick(COLORS);
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 800);
+  });
+
+  // ================= ПОПЯЧЬСЯ =================
+  const pop = document.getElementById("popyach");
+  const mq = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue("--mq")) || 44;
+  function placePop(x, y) {
+    const bw = pop.offsetWidth, bh = pop.offsetHeight;
+    pop.style.left = Math.max(6, Math.min(W() - bw - 6, x)) + "px";
+    pop.style.top = Math.max(mq() + 6, Math.min(H() - bh - mq() - 6, y)) + "px";
+  }
+  placePop(W() / 2 - pop.offsetWidth / 2, H() * (mobile() ? .62 : .7));
+  window.addEventListener("resize", () => placePop(parseFloat(pop.style.left), parseFloat(pop.style.top)));
+
+  let dodges = 0;
+  function dodge() {
+    if (dodges++ % 4 === 3) return false;
+    placePop(rnd(0, W()), rnd(0, H()));
+    pew();
+    return true;
+  }
+  pop.addEventListener("pointerenter", e => { if (e.pointerType === "mouse") dodge(); });
+  pop.addEventListener("pointerdown", e => { if (e.pointerType !== "mouse" && dodge()) e.preventDefault(); });
+  pop.addEventListener("pointerdown", e => { if (e.defaultPrevented) pop.dataset.skip = "1"; });
+  pop.addEventListener("click", () => {
+    if (pop.dataset.skip) { delete pop.dataset.skip; return; }
+    document.body.classList.toggle("popyach");
+    flyers.forEach(f => { f.vx = -f.vx * 1.5; f.vr = -f.vr; });
+    setTimeout(() => flyers.forEach(f => { f.vx /= 1.5; }), 2000);
+    for (let i = 0; i < 8; i++) setTimeout(() => boomAt(rnd(0, W()), rnd(0, H()), pick(["ПОПЯЧТСО", "УГ, ПОПЯЧЬСЯ!", "ПОПЯЧТСА"])), i * 90);
+    fart(true); speak("попячтсо");
+    pop.textContent = document.body.classList.contains("popyach") ? "ОТПЯЧЬСЯ" : "ПОПЯЧЬСЯ";
+  });
+
+  // ================= ОКНА =================
+  function makeWin(icon, msg, btns, onAny, note) {
+    if (document.querySelectorAll(".win").length >= (mobile() ? 3 : 7)) return;
+    const w = document.createElement("div");
+    w.className = "win";
+    const bar = document.createElement("div"); bar.className = "bar";
+    const ttl = document.createElement("div");
+    ttl.textContent = pick(["ИИ-Платформа.exe","Синергия.exe","1С:Платформа","SPAM.exe","Министерство.exe","УПЧК.exe","Онотоле.exe","Креатифф.exe"]);
+    const x1 = document.createElement("span"); x1.textContent = "×";
+    bar.append(ttl, x1);
+    const body = document.createElement("div"); body.className = "body";
+    const ic = document.createElement("i"); ic.textContent = icon;
+    const tx = document.createElement("div"); tx.textContent = maybeOlb(msg);
+    if (note) { const sm = document.createElement("small"); sm.textContent = note; tx.appendChild(sm); }
+    body.append(ic, tx);
+    const bb = document.createElement("div"); bb.className = "btns";
+    btns.forEach(label => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = label;
+      b.onclick = () => { w.remove(); onAny(label); };
+      bb.appendChild(b);
+    });
+    x1.onclick = () => { // крестик не спасает
+      honk(); w.remove();
+      const r = x1.getBoundingClientRect();
+      boomAt(r.left, r.top, pick(["Ф БАБРУЙСК!", "ХУЙС", "ПОПЯЧТСО"]));
+      setTimeout(randomPopup, 600);
+    };
+    w.append(bar, body, bb);
+    w.style.visibility = "hidden";
+    document.body.appendChild(w);
+    w.style.left = rnd(4, Math.max(4, W() - w.offsetWidth - 4)) + "px";
+    w.style.top = rnd(mq() + 4, Math.max(mq() + 4, H() - w.offsetHeight - mq() - 4)) + "px";
+    w.style.visibility = "";
+  }
+  function moreChaos() { robot(); randomPopup(); if (Math.random() < .5) randomPopup(); cnt += 100000; makeFlyer(); }
+  function randomPopup() {
+    if (Math.random() < .28) {
+      const name = genPlatform();
+      makeWin("🧩", `Обнаружена ${name}. Внедрить?`, ["ВНЕДРИТЬ","ВНЕДРИТЬ ДВАЖДЫ"], () => { makeFlyer(name.toUpperCase()); onotoleVerdict(); moreChaos(); }, pick(PITCH));
+      return;
+    }
+    const [icon, msg, btns, special] = pick(STATIC_POPUPS);
+    makeWin(icon, msg, btns, () => {
+      if (special === "ok") stamp("ОНОТОЛЕ ТОРЖЕСТВУЕ", true);
+      else if (special === "bad") stamp("ОНОТОЛЕ НЕГОДУЕ", false);
+      else if (special === "beams") otake();
+      else if (special) interrupt(special);
+      else moreChaos();
+    });
+  }
+
+  // ================= ГЕНЕРАТОР =================
+  const genBtn = document.getElementById("gen");
+  genBtn.addEventListener("click", () => {
+    const name = genPlatform();
+    speak(name);
+    makeWin("🧩", name.charAt(0).toUpperCase() + name.slice(1), ["ВНЕДРИТЬ","ПРОДАТЬ ИНВЕСТОРУ","ЕЩЁ!!!"], label => {
+      if (label === "ЕЩЁ!!!") { genBtn.click(); return; }
+      makeFlyer(name.toUpperCase());
+      for (let i = 0; i < 6; i++) setTimeout(() => boomAt(rnd(0, W()), rnd(0, H()), label === "ВНЕДРИТЬ" ? "ВНЕДРЕНО!!!" : "₽₽₽"), i * 100);
+      cnt += 1000000; whistle();
+      setTimeout(onotoleVerdict, 500);
+    }, pick(PITCH));
+  });
+
+  // ================= ЛУЧИ ПОНОСА / ОТАКЕ =================
+  function otake() {
+    const h = document.querySelector("h1").getBoundingClientRect();
+    speak("отаке! лучи поноса! пыщь пыщь");
+    document.body.classList.add("razupl");
+    for (let i = 0; i < 26; i++) setTimeout(() => {
+      const [sx, sy] = edgePoint();
+      const tx = h.left + rnd(0, h.width), ty = h.top + rnd(0, h.height);
+      beam(sx, sy, tx, ty); laser();
+      if (i % 3 === 0) boomAt(tx, ty, pick(["ПЫЩЬ!!!11", "GSOM", "РАЗУПЛОТНЕНИЕ", "ЖНЕЖНЕ", "ОТАКЕ!!!"]));
+    }, i * 70);
+    setTimeout(() => { document.body.classList.remove("razupl"); stamp("УГ РАЗУПЛОТНЕНО", true); }, 2000);
+  }
+  document.getElementById("beams").addEventListener("click", otake);
+
+  // ================= ГЛУПЫЙ ДЕПЛОЙ =================
+  let clopTimer = null;
+  document.getElementById("walk").addEventListener("click", () => {
+    silly = !silly;
+    document.body.classList.toggle("silly", silly);
+    if (silly) {
+      speak("министерство глупых деплоев");
+      flyers.forEach(f => { f.vy = -rnd(4, 14); });
+      clopTimer = setInterval(clop, 330);
+    } else {
+      flyers.forEach(f => { f.vy = rnd(-1.2, 1.2); });
+      clearInterval(clopTimer);
+    }
+  });
+
+  // ================= УЧИ ОЛБАНСКИЙ =================
+  const h1a = document.getElementById("h1a"), h1b = document.getElementById("h1b");
+  document.getElementById("olb").addEventListener("click", () => {
+    olb = !olb;
+    document.body.classList.toggle("olb", olb);
+    h1a.textContent = olb ? "ПЛАТФОРМО" : "ПЛАТФОРМА";
+    h1b.textContent = olb ? "ИИ АЛОЛО" : "ИИ ОЛОЛО";
+    flyers.forEach(f => { f.el.textContent = flyText(); });
+    speak(olb ? "учи олбанский, аффтар" : "превед, великий и могучий");
+    stamp(olb ? "АФФТАР ЖЖОТ" : "ЗАЧОТ", true);
+  });
+
+  // ================= ВНЕЗАПНЫЕ ВСТАВКИ =================
+  function floodText(n) {
+    const words = ["!!!УПЧК","1аДин65:цц","ПОТС ЗОХВАЧЕН!!!","ОНОТОЛЕ ТОРЖЕСТВУЕ!","поПячься!","УПЯЧКА СЛЕДИТ ЗА ТОБОЙ!!!","ДА-ДА!",
+      "А ты пробовал лизать октаэдр?!!1","КАГБЭ","ГОЛАКТЕКО ОПАСНОСТЕ","ЖЕПЬ ЕБРИЛО","ПЫЩЬ!!!11","kubectl delete platforma",
+      "ИИИ","%username%","ЖНЕЖНЕ","GSOM","ПЛАТФОРМА!!!","СИНЕРГИЯ","ЗАЧОТ","ПЕПЯКА++","СТОПИЦОТ"];
+    const junk = "!@#$%^&*:;?№1234567890=_+";
+    let s = "";
+    for (let i = 0; i < n; i++) s += pick(words) + Array.from({ length: Math.floor(rnd(1, 5)) }, () => pick(junk)).join("");
+    return s;
+  }
+  function interrupt(kind) {
+    if (document.querySelector(".interrupt")) return;
+    kind = kind || pick(["inq","diff","spam","gal","balet","zoh"]);
+    const o = document.createElement("div");
+    o.className = "interrupt " + kind;
+    let dur = 2400;
+    const add = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; e.textContent = text; o.appendChild(e); return e; };
+    if (kind === "inq") {
+      o.textContent = "НИКТО НЕ ЖДЁТ ИСПАНСКУЮ ИНКВИЗИЦИЮ!!!";
+      chord(); shake(); speak("никто не ждёт испанскую инквизицию");
+    } else if (kind === "diff") {
+      o.textContent = "А теперь — нечто совершенно иное:";
+      add("em", "", genPlatform().toUpperCase());
+      whistle(); speak("а теперь нечто совершенно иное"); dur = 3200;
+    } else if (kind === "spam") {
+      for (let i = 0; i < (mobile() ? 60 : 160); i++) add("span", "", Math.random() < .12 ? pick(["ИИ","ПЛАТФОРМА","ЯЙЦА","ЖЪРЧИК"]) : "СПАМ");
+      honk(); speak("спам спам спам спам спам спам платформа и спам");
+    } else if (kind === "gal") {
+      const box = add("div", "", "ГОЛАКТЕКО ОПАСНОСТЕ!!!");
+      const sm = document.createElement("span"); sm.className = "small";
+      sm.textContent = "НЛО — НИЗКО ЛЕТЯЩИЙ ОНОТОЛЕ — УЖЕ ВЫЛЕТЕЛ";
+      box.appendChild(sm);
+      add("span", "ufo", "🛸");
+      theremin(); speak("голактеко опасносте! онотоле уже летит"); dur = 3300;
+      setTimeout(() => stamp("ОНОТОЛЕ СПАС ГОЛАКТЕКУ", true), dur);
+    } else if (kind === "balet") {
+      const tv = add("div", "tv", "503: СЕРВЕР УПАЛ.");
+      const br = document.createElement("div"); br.textContent = "СМОТРИ БАЛЕТ!1"; tv.appendChild(br);
+      const d = document.createElement("span"); d.textContent = "🩰🦢🩰🦢🩰"; tv.appendChild(d);
+      musicBox(); speak("сервер упал. смотри балет"); dur = 3000;
+    } else {
+      add("div", "flood", floodText(mobile() ? 50 : 140));
+      add("div", "big", "ПОТС ЗОХВАЧЕН!!!");
+      for (let i = 0; i < 10; i++) setTimeout(() => { randomBeam(); laser(); }, i * 120);
+      robot(); speak("пост захвачен! упячка следит за тобой"); dur = 2600;
+    }
+    document.body.appendChild(o);
+    setTimeout(() => o.remove(), dur);
+  }
+  function loopInterrupts() { interrupt(); setTimeout(loopInterrupts, rnd(16000, 30000)); }
+  function loopStamps() { onotoleVerdict(); setTimeout(loopStamps, rnd(14000, 26000)); }
+
+  // ================= СТАРТ / ЗВУК =================
+  const start = document.getElementById("start");
+  start.addEventListener("click", () => {
+    try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) {}
+    start.remove();
+    fart(); speak("великий онотоле! платформа ии ололо");
+    setTimeout(loopSounds, 500);
+    setTimeout(loopSpeech, 3500);
+    setTimeout(randomPopup, 2500);
+    setTimeout(loopInterrupts, 11000);
+    setTimeout(loopStamps, 6000);
+    setInterval(() => { if (Math.random() < .5) randomPopup(); }, 7000);
+  });
+
+  const muteBtn = document.getElementById("mute");
+  muteBtn.addEventListener("click", () => {
+    muted = !muted;
+    if (muted && "speechSynthesis" in window) speechSynthesis.cancel();
+    muteBtn.textContent = muted ? "🔇 тишина" : "🔊 звук";
+  });
+
+  const titles = ["ПОПЯЧТСО!!!","ВЕЛИКИЙ ОНОТОЛЕ!!!11","💨 ПЫЩЬ 💨","СПАМ СПАМ СПАМ","ЙА КРЕВЕДКО","АФФТАР ЖЖОТ","ГОЛАКТЕКО ОПАСНОСТЕ","НИ!","СТОПИЦОТ"];
+  let ti = 0;
+  setInterval(() => { document.title = titles[ti++ % titles.length]; }, 500);
+})();
+</script>
+</body>
+</html>
