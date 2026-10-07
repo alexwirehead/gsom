@@ -183,6 +183,24 @@
   .win .btns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 0 12px 12px; }
   .win button { font: inherit; padding: 4px 14px; border: 2px outset #fff; background: #c0c0c0; cursor: pointer; }
 
+  /* ---------- УПЧК-амп ---------- */
+  .amp { z-index: 14; left: 12px; top: calc(var(--mq) + 70px + 40dvh + 18px + env(safe-area-inset-top, 0px)); width: min(300px, 26vw); transform: rotate(-1deg); }
+  .amp .screen { margin: 8px; background: #000; color: #0f0; font-family: "Courier New", monospace; font-weight: 700; border: 2px inset #fff; display: flex; align-items: center; gap: 8px; padding: 4px 6px; overflow: hidden; }
+  .amp .ticker { flex: 1; overflow: hidden; white-space: nowrap; }
+  .amp .ticker span { display: inline-block; padding-left: 100%; animation: run 9s linear infinite; }
+  .amp .eq { display: flex; align-items: flex-end; gap: 2px; height: 18px; flex: none; }
+  .amp .eq i { width: 4px; height: 100%; background: #ff0; transform-origin: bottom; transform: scaleY(.15); }
+  body.disco .amp .eq i { animation: eq .4s ease-in-out infinite alternate; }
+  .amp .eq i:nth-child(2) { animation-duration: .3s; } .amp .eq i:nth-child(3) { animation-duration: .5s; }
+  .amp .eq i:nth-child(4) { animation-duration: .35s; } .amp .eq i:nth-child(5) { animation-duration: .45s; }
+  @keyframes eq { from { transform: scaleY(.15); } to { transform: scaleY(1); } }
+  .amp .btns { padding-bottom: 8px; }
+  .amp .btns button { font-size: 16px; padding: 2px 14px; }
+  .controls .disco { background: #0ff; border-color: #000080; transform: rotate(-2deg); }
+  body.disco .controls .disco { background: #00f; color: #fff; }
+  body.disco .pepyaka, body.disco .pepyaka * { animation-duration: .14s !important; }
+  .ufofly { position: fixed; z-index: 8; top: 18%; left: -120px; font-size: 70px; pointer-events: none; animation: ufo 3.2s linear forwards; }
+
   /* ---------- внезапные вставки ---------- */
   .interrupt {
     position: fixed; inset: 0; z-index: 25; display: grid; place-items: center; text-align: center; pointer-events: none;
@@ -263,6 +281,10 @@
     .boom { font-size: 30px; }
     .win { font-size: 13px; }
     .interrupt .ufo { font-size: 56px; }
+    .amp { left: 6px; right: 6px; width: auto; top: calc(var(--mq) + 40px + env(safe-area-inset-top, 0px)); transform: none; font-size: 12px; }
+    .amp .screen { margin: 5px; }
+    .amp .btns { padding: 0 8px 6px; }
+    .ufofly { font-size: 44px; }
   }
 
   /* ---------- телефон боком ---------- */
@@ -277,6 +299,11 @@
     .controls button { font-size: 12px; padding: 3px 8px; }
     #popyach { font-size: 16px; padding: 5px 12px; }
     .emoji { font-size: 30px; }
+  }
+  @media (max-height: 520px) and (orientation: landscape) {
+    .amp { left: 6px; width: min(300px, 40vw); top: calc(var(--mq) + 36px + env(safe-area-inset-top, 0px)); font-size: 12px; }
+    .amp .screen { margin: 4px 6px; }
+    .amp .btns { padding: 0 8px 4px; }
   }
 </style>
 </head>
@@ -349,7 +376,14 @@
   <button class="beams" id="beams" type="button">☄️ лучи поноса</button>
   <button class="walk" id="walk" type="button">🥥 глупый деплой</button>
   <button class="olb" id="olb" type="button">🔤 учи олбанский</button>
+  <button class="disco" id="disco" type="button">🛸 дисктоячка</button>
   <button id="mute" type="button">🔊 звук</button>
+</div>
+
+<div class="win amp" id="amp" hidden>
+  <div class="bar"><div>УПЧК-амп.exe</div><span id="ampX">×</span></div>
+  <div class="screen"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><div class="ticker"><span id="ampTitle"></span></div></div>
+  <div class="btns"><button id="ampPrev" type="button">⏮</button><button id="ampPlay" type="button">▶</button><button id="ampNext" type="button">⏭</button></div>
 </div>
 
 <div id="start"><button type="button">ЖМИ ЧТОБ ПЫЩЬ 💨</button></div>
@@ -505,6 +539,31 @@
     "великий онотоле","онотоле одобряе","онотоле негодуе","голактеко опасносте","упячка следит за тобой",
     "аффтар жжот","превед медвед","зачот","не деплой уг на глагне","жепь ебрило","лучи поноса","смотри балет",
     "пыщь адин адин адин","ебанулись на отличненько","а ты пробовал лизать октаэдр","стопицот"];
+  // Треки «УПЧК-ампа»: свои 8-битные мелодии, от лора Упячки только названия и мемные фразы.
+  // Шаг — шестнадцатая. Токены: нота "A4", аккорд "D4+F4+A4", "-" тянуть предыдущую, "." пауза, "|" — граница такта.
+  // drums: K бочка, S снейр, h хэт, o открытый хэт (можно склеивать: "KS"). fx: p пыщь, u НЛО, z гудок.
+  // Партии зацикливаются независимо, say произносится по очереди раз в sayEvery тактов.
+  const TRACKS = [
+    { name: "ПЫЩЬ ПЫЩЬ ОЛОЛО, Я ВОДИТЕЛЬ НЛО", bpm: 140, lead: "square",
+      melody: "E5 - - . E5 . D5 . C5 - . . A4 . C5 . | D5 - - . C5 . A4 . F4 - - - . . . . | E5 - - . E5 . G5 . E5 . D5 . C5 - . . | D5 - . . B4 . G4 . A4 - - - - - . .",
+      bass:   "A1 . A2 . A1 . A2 . A1 . A2 . A1 . A2 . | F1 . F2 . F1 . F2 . F1 . F2 . F1 . F2 . | C2 . C3 . C2 . C3 . C2 . C3 . C2 . C3 . | G1 . G2 . G1 . G2 . G1 . G2 . G1 . G2 .",
+      drums:  "K . o . KS . o . K . o . KS . o h",
+      fx:     "p . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | p . . . . . . . . . . . . . . . | . . . . . . . . u . . . . . . .",
+      say: ["пыщь пыщь ололо", "я водитель нло", "ололо ололо", "нло — низко летящий онотоле"], sayEvery: 2 },
+    { name: "МАРШ ВОЕНОВ УПЧК", bpm: 116, lead: "square",
+      melody: "G4 - . G4 C5 - - - E5 - . D5 C5 - . . | D5 - . D5 B4 - - - G4 - . A4 B4 - . . | A4 - . A4 C5 - - - F5 - . E5 D5 - C5 - | B4 - . G4 A4 - B4 - C5 - - - . . . .",
+      bass:   "C2 . . . G1 . . . C2 . . . G1 . . . | G1 . . . D2 . . . G1 . . . D2 . . . | F1 . . . C2 . . . F1 . . . C2 . . . | G1 . . . G1 . . . C2 . . . C2 . . .",
+      drums:  "K . S . K . S S K . S . K S S S",
+      fx:     ". . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | . . . . . . . . z . . . . . . .",
+      say: ["отаке воене!", "потс зохвачен", "онотоле одобряе", "упячка следит за тобой"], sayEvery: 2 },
+    { name: "С.Р.У. РАГГА", bpm: 84, lead: "triangle",
+      chords: ". . . . D4+F4+A4 . . . . . . . D4+F4+A4 . . . | . . . . C4+E4+G4 . . . . . . . C4+E4+G4 . . .",
+      melody: ". . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | A4 - . A4 . . G4 . F4 - . E4 . . D4 - | - - - - . . . . . . . . . . . .",
+      bass:   "D2 - - . . . A1 . D2 - . F2 . . E2 . | C2 - - . . . G1 . C2 - . E2 . . D2 .",
+      drums:  "h . h . h . h . KS . h . h . h .",
+      fx:     ". . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | . . . . . . . . . . . . p . . .",
+      say: ["свобода!", "равенство!", "упячка!", "бутылка жърчика и пяни пачка"], sayEvery: 1 }
+  ];
 
   // ================= ЛЕТАЮЩИЙ ТЕКСТ =================
   const stage = document.getElementById("stage");
@@ -687,13 +746,17 @@
     const notes = [440, 554, 659, 880, 659, 554, 494, 587, 740, 587, 494, 440];
     notes.forEach((n, i) => tone("triangle", n * (i % 3 === 0 ? 1 : 1), i * .22, .2, i % 3 === 0 ? .2 : .1));
   }
-  function clop() {
-    if (!live()) return;
+  function noise() { // буфер шума генерируется один раз
     if (!noiseBuf) {
       noiseBuf = ctx.createBuffer(1, ctx.sampleRate * .1, ctx.sampleRate);
       const d = noiseBuf.getChannelData(0);
       for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / 300);
     }
+    return noiseBuf;
+  }
+  function clop() {
+    if (!live()) return;
+    noise();
     [0, .13].forEach((d, i) => {
       const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
       s.buffer = noiseBuf; f.type = "bandpass"; f.frequency.value = i ? 1300 : 1900; f.Q.value = 5; g.gain.value = 1.2;
@@ -712,10 +775,107 @@
     s();
     if (s === fart && Math.random() < .5) randomBeam(); // лучи поноса сопровождают звук
   }
-  function loopSounds() { randomSound(); setTimeout(loopSounds, rnd(400, 1500)); }
+  function loopSounds() { if (!amp.on || Math.random() < .15) randomSound(); setTimeout(loopSounds, rnd(400, 1500)); }
   function loopSpeech() {
-    speak(Math.random() < .3 ? genPlatform() : pick(SPEECH));
+    if (!amp.on) speak(Math.random() < .3 ? genPlatform() : pick(SPEECH));
     setTimeout(loopSpeech, rnd(5000, 11000));
+  }
+
+  // ================= УПЧК-АМП (секвенсор) =================
+  // Ноты ставятся на ctx.currentTime с упреждением: раз в 25мс планируем всё, что попадает в ближайшие 120мс.
+  const amp = { on: false, ti: 0, step: 0, next: 0, timer: null, gain: null, parts: null, say: 0 };
+  const NOTE_IX = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  const freq = n => { const m = /^([A-G])(#?)(\d)$/.exec(n); return m ? 440 * 2 ** ((NOTE_IX[m[1]] + (m[2] ? 1 : 0) + 12 * (+m[3] + 1) - 69) / 12) : 0; };
+  const parsePart = p => p ? p.split(/\s+/).filter(x => x && x !== "|") : null;
+  function ampNote(type, f, t, dur, vol) {
+    if (!live()) return;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + .01);
+    g.gain.setValueAtTime(vol, t + Math.max(.02, dur - .05));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(amp.gain);
+    o.start(t); o.stop(t + dur + .01);
+  }
+  function ampDrum(ch, t) {
+    if (!live()) return;
+    if (ch === "K") {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(40, t + .18);
+      g.gain.setValueAtTime(.7, t); g.gain.exponentialRampToValueAtTime(0.0001, t + .2);
+      o.connect(g); g.connect(amp.gain); o.start(t); o.stop(t + .21);
+      return;
+    }
+    const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    s.buffer = noise();
+    if (ch === "S") { s.playbackRate.value = .35; f.type = "bandpass"; f.frequency.value = 1800; g.gain.value = 1.4; }
+    else { s.playbackRate.value = ch === "o" ? .5 : 1; f.type = "highpass"; f.frequency.value = 7000; g.gain.value = ch === "o" ? .5 : .35; }
+    s.connect(f); f.connect(g); g.connect(amp.gain);
+    s.start(t);
+  }
+  function ampFx(ch, delay) {
+    const run = () => { if (!amp.on) return;
+      if (ch === "p") pew();
+      else if (ch === "z") honk();
+      else if (ch === "u") { theremin(); ufoFly(); } };
+    setTimeout(run, delay * 1000);
+  }
+  function ufoFly() {
+    if (document.querySelector(".ufofly")) return;
+    const u = document.createElement("div");
+    u.className = "ufofly"; u.textContent = "🛸";
+    document.body.appendChild(u);
+    setTimeout(() => u.remove(), 3200);
+  }
+  const center = document.querySelector(".center");
+  function ampStep(t) {
+    const tr = TRACKS[amp.ti], P = amp.parts, sp = 60 / tr.bpm / 4, i = amp.step;
+    const at = (part, k) => part[k % part.length];
+    for (const [key, type, vol] of [["melody", tr.lead, .09], ["bass", "square", .06], ["chords", "square", .035]]) {
+      const part = P[key]; if (!part) continue;
+      const tok = at(part, i); if (tok === "." || tok === "-") continue;
+      let len = 1; while (len < part.length && at(part, i + len) === "-") len++;
+      const dur = key === "chords" ? sp * .8 : sp * len * .95;
+      tok.split("+").forEach(n => { const f = freq(n); if (f) ampNote(type, f, t, dur, vol); });
+    }
+    if (P.drums) for (const ch of at(P.drums, i)) if (ch !== ".") ampDrum(ch, t);
+    const delay = Math.max(0, t - ctx.currentTime);
+    if (P.fx) for (const ch of at(P.fx, i)) if (ch !== ".") ampFx(ch, delay);
+    if (i % 4 === 0) setTimeout(() => { if (amp.on) center.animate([{ transform: "scale(1.06)" }, { transform: "none" }], 160); }, delay * 1000);
+    if (i % (16 * (tr.sayEvery || 4)) === 0 && tr.say) {
+      const line = tr.say[amp.say++ % tr.say.length];
+      setTimeout(() => { if (amp.on) speak(line); }, delay * 1000);
+    }
+  }
+  function ampTick() {
+    if (!live()) { ampStop(); return; }
+    const sp = 60 / TRACKS[amp.ti].bpm / 4;
+    while (amp.next < ctx.currentTime + .12) { ampStep(amp.next); amp.next += sp; amp.step++; }
+  }
+  function ampPlay(ti) {
+    if (!live()) return;
+    ampStop(true);
+    if (!amp.gain) { amp.gain = ctx.createGain(); amp.gain.connect(ctx.destination); }
+    amp.gain.gain.cancelScheduledValues(ctx.currentTime);
+    amp.gain.gain.setValueAtTime(1, ctx.currentTime);
+    amp.ti = ((ti % TRACKS.length) + TRACKS.length) % TRACKS.length;
+    const tr = TRACKS[amp.ti];
+    amp.parts = { melody: parsePart(tr.melody), bass: parsePart(tr.bass), chords: parsePart(tr.chords), drums: parsePart(tr.drums), fx: parsePart(tr.fx) };
+    amp.on = true; amp.step = 0; amp.say = 0; amp.next = ctx.currentTime + .08;
+    amp.timer = setInterval(ampTick, 25);
+    ampTick();
+    ampUI();
+  }
+  function ampStop(quiet) {
+    clearInterval(amp.timer); amp.timer = null;
+    if (amp.on && amp.gain && ctx) { // глушим уже запланированные ноты
+      amp.gain.gain.cancelScheduledValues(ctx.currentTime);
+      amp.gain.gain.setTargetAtTime(0, ctx.currentTime, .02);
+      amp.gain = null; // новые ноты пойдут в свежий gain
+    }
+    amp.on = false;
+    if (!quiet) ampUI();
   }
 
   // ================= ВЗРЫВЫ / ЛУЧИ / ПЕЧАТИ =================
@@ -808,7 +968,7 @@
 
   // ================= ОКНА =================
   function makeWin(icon, msg, btns, onAny, note) {
-    if (document.querySelectorAll(".win").length >= (mobile() ? 3 : 7)) return;
+    if (document.querySelectorAll(".win:not(.amp)").length >= (mobile() ? 3 : 7)) return;
     const w = document.createElement("div");
     w.className = "win";
     const bar = document.createElement("div"); bar.className = "bar";
@@ -965,6 +1125,23 @@
   function loopInterrupts() { interrupt(); setTimeout(loopInterrupts, rnd(16000, 30000)); }
   function loopStamps() { onotoleVerdict(); setTimeout(loopStamps, rnd(14000, 26000)); }
 
+  // ================= УПЧК-АМП (окно) =================
+  const ampWin = document.getElementById("amp"), ampTitle = document.getElementById("ampTitle"), ampBtn = document.getElementById("ampPlay");
+  function ampUI() {
+    ampTitle.textContent = `${amp.ti + 1}. ${TRACKS[amp.ti].name} ★ ${amp.on ? "ИГРАЕТ" : "ПАУЗА"} ★ ${TRACKS[amp.ti].bpm} BPM ★`;
+    ampBtn.textContent = amp.on ? "⏸" : "▶";
+    document.body.classList.toggle("disco", amp.on);
+  }
+  document.getElementById("disco").addEventListener("click", () => {
+    if (ampWin.hidden) { ampWin.hidden = false; ampPlay(amp.ti); stamp("ДИСКТОЯЧКА!!!11", true); }
+    else { ampStop(); ampWin.hidden = true; }
+  });
+  ampBtn.addEventListener("click", () => amp.on ? ampStop() : ampPlay(amp.ti));
+  document.getElementById("ampPrev").addEventListener("click", () => ampPlay(amp.ti - 1));
+  document.getElementById("ampNext").addEventListener("click", () => ampPlay(amp.ti + 1));
+  document.getElementById("ampX").addEventListener("click", () => { ampStop(); ampWin.hidden = true; honk(); });
+  ampUI();
+
   // ================= СТАРТ / ЗВУК =================
   const start = document.getElementById("start");
   start.addEventListener("click", () => {
@@ -983,6 +1160,7 @@
   muteBtn.addEventListener("click", () => {
     muted = !muted;
     if (muted && "speechSynthesis" in window) speechSynthesis.cancel();
+    if (muted) ampStop();
     muteBtn.textContent = muted ? "🔇 тишина" : "🔊 звук";
   });
 

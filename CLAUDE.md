@@ -14,7 +14,8 @@
 - Тексты и мемы — константы в начале `<script>` (SPEC §5). Новые мемы добавляются туда, логику трогать не нужно.
 - Генератор платформ — `genPlatform()`, олбанский — `olbanize()`.
 - Эффекты: `boomAt`, `beam`, `stamp`, `makeWin`, `interrupt(kind)`, `otake`.
-- Режимы задаются классами на body: `popyach`, `silly`, `razupl`, `olb`, `shake`.
+- Музыка: УПЧК-амп — `ampPlay(i)`/`ampStop()`, треки в `TRACKS` (SPEC §6.12). Мелодии только свои.
+- Режимы задаются классами на body: `popyach`, `silly`, `razupl`, `olb`, `shake`, `disco`.
 
 ## Коммиты
 - Все коммиты в этом репозитории пишутся через скилл `pyshch-commit` (лежит в `.claude/skills/pyshch-commit/`), даже если просят просто «закоммить».
