@@ -583,26 +583,42 @@
   // Шаг — шестнадцатая. Токены: нота "A4", аккорд "D4+F4+A4", "-" тянуть предыдущую, "." пауза, "|" — граница такта.
   // drums: K бочка, S снейр, h хэт, o открытый хэт (можно склеивать: "KS"). fx: p пыщь, u НЛО, z гудок.
   // Партии зацикливаются независимо, say произносится по очереди раз в sayEvery тактов.
+  // Трек играет loops раз по самой длинной партии и переключается на следующий. bassWave/reese — тип баса и «рииз» из двух расстроенных осцилляторов.
   const TRACKS = [
-    { name: "ПЫЩЬ ПЫЩЬ ОЛОЛО, Я ВОДИТЕЛЬ НЛО", bpm: 140, lead: "square",
-      melody: "E5 - - . E5 . D5 . C5 - . . A4 . C5 . | D5 - - . C5 . A4 . F4 - - - . . . . | E5 - - . E5 . G5 . E5 . D5 . C5 - . . | D5 - . . B4 . G4 . A4 - - - - - . .",
-      bass:   "A1 . A2 . A1 . A2 . A1 . A2 . A1 . A2 . | F1 . F2 . F1 . F2 . F1 . F2 . F1 . F2 . | C2 . C3 . C2 . C3 . C2 . C3 . C2 . C3 . | G1 . G2 . G1 . G2 . G1 . G2 . G1 . G2 .",
-      drums:  "K . o . KS . o . K . o . KS . o h",
-      fx:     "p . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | p . . . . . . . . . . . . . . . | . . . . . . . . u . . . . . . .",
+    { name: "ПЫЩЬ ПЫЩЬ ОЛОЛО, Я ВОДИТЕЛЬ НЛО", bpm: 140, lead: "square", loops: 3,
+      melody: "E5 - - . E5 . D5 . C5 - . . A4 . C5 . | D5 - - . C5 . A4 . F4 - - - . . . . | E5 - - . E5 . G5 . E5 . D5 . C5 - . . | D5 - . . B4 . G4 . A4 - - - - - . . | " +
+              "A5 . A5 . G5 . A5 . C6 - - . A5 - . . | G5 . G5 . F5 . G5 . B5 - - . G5 - . . | E5 . E5 . D5 . E5 . G5 - . E5 . D5 . . | C5 - . B4 . A4 . . A4 - - - - - - .",
+      bass:   "A1 . A2 . A1 . A2 . A1 . A2 . A1 . A2 . | F1 . F2 . F1 . F2 . F1 . F2 . F1 . F2 . | C2 . C3 . C2 . C3 . C2 . C3 . C2 . C3 . | G1 . G2 . G1 . G2 . G1 . G2 . G1 . G2 . | " +
+              "F1 . F2 . F1 . F2 . F1 . F2 . F1 . F2 . | G1 . G2 . G1 . G2 . G1 . G2 . G1 . G2 . | E1 . E2 . E1 . E2 . E1 . E2 . E1 . E2 . | A1 . A2 . A1 . A2 . A1 . A2 . E1 . E2 .",
+      drums:  "K . o . KS . o . K . o . KS . o h | K . o . KS . o . K . o . KS . o h | K . o . KS . o . K . o . KS . o h | K . o . KS . o . K . KS . KS S S S",
+      fx:     "p . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | p . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | " +
+              "p . . . p . . . . . . . . . . . | . . . . . . . . . . . . . . . . | p . . . p . . . . . . . . . . . | . . . . . . . . u . . . . . . .",
       say: ["пыщь пыщь ололо", "я водитель нло", "ололо ололо", "нло — низко летящий онотоле"], sayEvery: 2 },
-    { name: "МАРШ ВОЕНОВ УПЧК", bpm: 116, lead: "square",
-      melody: "G4 - . G4 C5 - - - E5 - . D5 C5 - . . | D5 - . D5 B4 - - - G4 - . A4 B4 - . . | A4 - . A4 C5 - - - F5 - . E5 D5 - C5 - | B4 - . G4 A4 - B4 - C5 - - - . . . .",
-      bass:   "C2 . . . G1 . . . C2 . . . G1 . . . | G1 . . . D2 . . . G1 . . . D2 . . . | F1 . . . C2 . . . F1 . . . C2 . . . | G1 . . . G1 . . . C2 . . . C2 . . .",
-      drums:  "K . S . K . S S K . S . K S S S",
-      fx:     ". . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | . . . . . . . . z . . . . . . .",
+    { name: "МАРШ ВОЕНОВ УПЧК", bpm: 116, lead: "square", loops: 2,
+      melody: "G4 - . G4 C5 - - - E5 - . D5 C5 - . . | D5 - . D5 B4 - - - G4 - . A4 B4 - . . | A4 - . A4 C5 - - - F5 - . E5 D5 - C5 - | B4 - . G4 A4 - B4 - C5 - - - . . . . | " +
+              "E5 - - . E5 . A5 . G5 - . . E5 - . . | F5 - - . F5 . A5 . G5 - F5 - E5 - . . | D5 - . D5 E5 - . F5 G5 - . A5 B5 - . . | C6 - - - G5 - - - C6 - - - . . . .",
+      bass:   "C2 . . . G1 . . . C2 . . . G1 . . . | G1 . . . D2 . . . G1 . . . D2 . . . | F1 . . . C2 . . . F1 . . . C2 . . . | G1 . . . G1 . . . C2 . . . C2 . . . | " +
+              "A1 . . . E2 . . . A1 . . . E2 . . . | F1 . . . C2 . . . F1 . . . C2 . . . | G1 . . . D2 . . . G1 . . . B1 . . . | C2 . . . G1 . . . C2 . . . . . . .",
+      drums:  "K . S . K . S S K . S . K . S . | K . S . K . S S K . S . K S S S",
+      fx:     ". . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | . . . . . . . . z . . . . . . . | " +
+              ". . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | z . . . . . . . z . . . . . . .",
       say: ["отаке воене!", "потс зохвачен", "онотоле одобряе", "упячка следит за тобой"], sayEvery: 2 },
-    { name: "С.Р.У. РАГГА", bpm: 84, lead: "triangle",
-      chords: ". . . . D4+F4+A4 . . . . . . . D4+F4+A4 . . . | . . . . C4+E4+G4 . . . . . . . C4+E4+G4 . . .",
-      melody: ". . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | A4 - . A4 . . G4 . F4 - . E4 . . D4 - | - - - - . . . . . . . . . . . .",
-      bass:   "D2 - - . . . A1 . D2 - . F2 . . E2 . | C2 - - . . . G1 . C2 - . E2 . . D2 .",
-      drums:  "h . h . h . h . KS . h . h . h .",
+    { name: "С.Р.У. РАГГА", bpm: 84, lead: "triangle", loops: 2,
+      chords: ". . . . D4+F4+A4 . . . . . . . D4+F4+A4 . . . | . . . . C4+E4+G4 . . . . . . . C4+E4+G4 . . . | . . . . A#3+D4+F4 . . . . . . . A#3+D4+F4 . . . | . . . . C4+E4+G4 . . . . . . . C4+E4+G4 . . .",
+      melody: ". . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | A4 - . A4 . . G4 . F4 - . E4 . . D4 - | - - - - . . . . . . . . . . . . | " +
+              "D5 - . C5 . . A4 . C5 - . A4 . . G4 - | A4 - - - . . . . . . . . . . . . | F4 . G4 . A4 . . . A4 . G4 . F4 . E4 . | D4 - - - - - - - . . . . . . . .",
+      bass:   "D2 - - . . . A1 . D2 - . F2 . . E2 . | C2 - - . . . G1 . C2 - . E2 . . D2 . | A#1 - - . . . F1 . A#1 - . D2 . . C2 . | C2 - - . . . G1 . C2 - . E2 . . C#2 .",
+      drums:  "h . h . h . h . KS . h . h . h . | h . h . h . h . KS . h . h . KS h",
       fx:     ". . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | . . . . . . . . . . . . p . . .",
-      say: ["свобода!", "равенство!", "упячка!", "бутылка жърчика и пяни пачка"], sayEvery: 1 }
+      say: ["свобода!", "равенство!", "упячка!", "бутылка жърчика и пяни пачка"], sayEvery: 1 },
+    { name: "★ БОНУС ★ ДЖАНГЛ ОЛОЛО (8-BIT DRUM'N'BASS)", bpm: 174, lead: "square", bassWave: "sawtooth", reese: true, loops: 3,
+      melody: "E5 G5 B5 E6 B5 G5 E5 G5 B5 E6 B5 G5 E5 G5 B5 G5 | C5 E5 G5 C6 G5 E5 C5 E5 G5 C6 G5 E5 C5 E5 G5 E5 | E5 G5 B5 E6 B5 G5 E5 G5 B5 E6 B5 G5 E5 G5 B5 G5 | B4 D#5 F#5 B5 F#5 D#5 B4 D#5 F#5 B5 F#5 D#5 B4 D#5 F#5 D#5 | " +
+              "B5 - - . G5 - - . E5 - . G5 . . A5 - | G5 - - - - - . . . . . . . . . . | E5 - . E5 G5 - . A5 B5 - . D6 B5 - A5 - | B5 - - - - - - - . . . . F#5 . D#5 .",
+      bass:   "E2 - - - - - - . E2 - . . G2 - . . | C2 - - - - - - . C2 - . . D2 - . . | E2 - - - - - - . E2 - . . G2 - A2 - | B1 - - - - - - . B1 - . . D2 - C2 -",
+      drums:  "K . h . S . h . h . K h S . h . | K . h . S . h K . . K h S . h S | K . h . S . h . h . K h S . h . | K . h . S . h K . S K . S S S S",
+      fx:     "u . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | . . . . . . . . . . . . p . . . | " +
+              "p . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . . | p . . . . . . . . . . . . . . . | . . . . . . . . . . . . . . . .",
+      say: ["джангл ололо", "голактеко опасносте", "сто семьдесят четыре пыщь в минуту", "онотоле одобряе брейкбит"], sayEvery: 4 }
   ];
 
   // ================= ЛЕТАЮЩИЙ ТЕКСТ =================
@@ -873,12 +889,14 @@
   function ampStep(t) {
     const tr = TRACKS[amp.ti], P = amp.parts, sp = 60 / tr.bpm / 4, i = amp.step;
     const at = (part, k) => part[k % part.length];
-    for (const [key, type, vol] of [["melody", tr.lead, .09], ["bass", "square", .06], ["chords", "square", .035]]) {
+    for (const [key, type, vol] of [["melody", tr.lead, .09], ["bass", tr.bassWave || "square", .06], ["chords", "square", .035]]) {
       const part = P[key]; if (!part) continue;
       const tok = at(part, i); if (tok === "." || tok === "-") continue;
       let len = 1; while (len < part.length && at(part, i + len) === "-") len++;
       const dur = key === "chords" ? sp * .8 : sp * len * .95;
-      tok.split("+").forEach(n => { const f = freq(n); if (f) ampNote(type, f, t, dur, vol); });
+      tok.split("+").forEach(n => { const f = freq(n); if (!f) return;
+        ampNote(type, f, t, dur, vol);
+        if (key === "bass" && tr.reese) ampNote(type, f * 1.012, t, dur, vol); });
     }
     if (P.drums) for (const ch of at(P.drums, i)) if (ch !== ".") ampDrum(ch, t);
     const delay = Math.max(0, t - ctx.currentTime);
@@ -891,8 +909,16 @@
   }
   function ampTick() {
     if (!live()) { ampStop(); return; }
-    const sp = 60 / TRACKS[amp.ti].bpm / 4;
-    while (amp.next < ctx.currentTime + .12) { ampStep(amp.next); amp.next += sp; amp.step++; }
+    const tr = TRACKS[amp.ti], sp = 60 / tr.bpm / 4;
+    while (amp.next < ctx.currentTime + .12) {
+      if (amp.step >= amp.len * (tr.loops || 2)) { // трек доигран: дождаться конца последнего шага и включить следующий
+        clearInterval(amp.timer); amp.timer = null;
+        const ti = amp.ti;
+        setTimeout(() => { if (amp.on && amp.ti === ti) ampPlay(ti + 1); }, Math.max(0, amp.next - ctx.currentTime) * 1000);
+        return;
+      }
+      ampStep(amp.next); amp.next += sp; amp.step++;
+    }
   }
   function ampPlay(ti) {
     if (!live()) return;
@@ -903,6 +929,7 @@
     amp.ti = ((ti % TRACKS.length) + TRACKS.length) % TRACKS.length;
     const tr = TRACKS[amp.ti];
     amp.parts = { melody: parsePart(tr.melody), bass: parsePart(tr.bass), chords: parsePart(tr.chords), drums: parsePart(tr.drums), fx: parsePart(tr.fx) };
+    amp.len = Math.max(...Object.values(amp.parts).map(x => x ? x.length : 0));
     amp.on = true; amp.step = 0; amp.say = 0; amp.next = ctx.currentTime + .08;
     amp.timer = setInterval(ampTick, 25);
     ampTick();
@@ -1170,12 +1197,12 @@
   // ================= УПЧК-АМП (окно) =================
   const ampWin = document.getElementById("amp"), ampTitle = document.getElementById("ampTitle"), ampBtn = document.getElementById("ampPlay");
   function ampUI() {
-    ampTitle.textContent = `${amp.ti + 1}. ${TRACKS[amp.ti].name} ★ ${amp.on ? "ИГРАЕТ" : "ПАУЗА"} ★ ${TRACKS[amp.ti].bpm} BPM ★`;
+    ampTitle.textContent = `${amp.ti + 1}/${TRACKS.length}. ${TRACKS[amp.ti].name} ★ ${amp.on ? "ИГРАЕТ" : "ПАУЗА"} ★ ${TRACKS[amp.ti].bpm} BPM ★`;
     ampBtn.textContent = amp.on ? "⏸" : "▶";
     document.body.classList.toggle("disco", amp.on);
   }
   document.getElementById("disco").addEventListener("click", () => {
-    if (ampWin.hidden) { ampWin.hidden = false; ampPlay(amp.ti); stamp("ДИСКТОЯЧКА!!!11", true); }
+    if (ampWin.hidden) { ampWin.hidden = false; ampPlay(Math.floor(rnd(0, TRACKS.length))); stamp("ДИСКТОЯЧКА!!!11", true); }
     else { ampStop(); ampWin.hidden = true; }
   });
   ampBtn.addEventListener("click", () => amp.on ? ampStop() : ampPlay(amp.ti));
