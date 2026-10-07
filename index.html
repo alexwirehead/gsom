@@ -218,6 +218,14 @@
 
   .shake { animation: shake .15s linear 3; }
   @keyframes shake { 25% { transform: translate(8px, -6px); } 50% { transform: translate(-8px, 6px); } 75% { transform: translate(6px, 8px); } }
+  /* в перевёрнутом режиме трясём вместе с переворотом, иначе сайт на 0.45с встаёт на ноги */
+  body.popyach.shake { animation-name: shakeflip; }
+  @keyframes shakeflip {
+    0%, 100% { transform: scaleX(-1) rotate(180deg); }
+    25% { transform: translate(8px, -6px) scaleX(-1) rotate(180deg); }
+    50% { transform: translate(-8px, 6px) scaleX(-1) rotate(180deg); }
+    75% { transform: translate(6px, 8px) scaleX(-1) rotate(180deg); }
+  }
 
   /* ---------- планшет ---------- */
   @media (max-width: 1000px) {
