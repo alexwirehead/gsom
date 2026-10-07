@@ -519,10 +519,12 @@
     el.style.fontSize = rnd(14, 54) * fontScale() + "px";
     el.style.color = pick(COLORS);
     stage.appendChild(el);
-    flyers.push({ el, x: rnd(-W(), W()), y: rnd(0, H()),
+    flyers.push({ el, w: el.offsetWidth, x: rnd(-W(), W()), y: rnd(0, H()),
       vx: rnd(1.5, 7) * fontScale() * (Math.random() < .5 ? -1 : 1), vy: rnd(-1.2, 1.2),
       rot: rnd(-30, 30), vr: rnd(-1.5, 1.5), wob: rnd(0, 6.28), ws: rnd(.02, .09) });
   }
+  // ширина кешируется при смене текста, чтобы tick() не читал offsetWidth на каждом кадре
+  function setFlyText(f, text) { f.el.textContent = text; f.w = f.el.offsetWidth; }
   const baseCount = () => Math.round(Math.min(34, Math.max(12, (W() * H()) / 45000)));
   for (let i = 0; i < baseCount(); i++) makeFlyer();
 
@@ -537,9 +539,8 @@
         f.y += f.vy + Math.sin(f.wob) * 2;
         if (f.y < -80) f.y = h0; if (f.y > h0 + 80) f.y = -40;
       }
-      const w = f.el.offsetWidth;
-      if (f.vx > 0 && f.x > w0 + 50) { f.x = -w; if (Math.random() < .35) f.el.textContent = flyText(); }
-      if (f.vx < 0 && f.x < -w - 50) { f.x = w0; if (Math.random() < .35) f.el.textContent = flyText(); }
+      if (f.vx > 0 && f.x > w0 + 50) { f.x = -f.w; if (Math.random() < .35) setFlyText(f, flyText()); }
+      if (f.vx < 0 && f.x < -f.w - 50) { f.x = w0; if (Math.random() < .35) setFlyText(f, flyText()); }
       f.el.style.transform = `translate(${f.x}px,${f.y}px) rotate(${f.rot}deg)`;
     }
     requestAnimationFrame(tick);
@@ -897,7 +898,7 @@
     document.body.classList.toggle("olb", olb);
     h1a.textContent = olb ? "ПЛАТФОРМО" : "ПЛАТФОРМА";
     h1b.textContent = olb ? "ИИ АЛОЛО" : "ИИ ОЛОЛО";
-    flyers.forEach(f => { f.el.textContent = flyText(); });
+    flyers.forEach(f => setFlyText(f, flyText()));
     speak(olb ? "учи олбанский, аффтар" : "превед, великий и могучий");
     stamp(olb ? "АФФТАР ЖЖОТ" : "ЗАЧОТ", true);
   });
