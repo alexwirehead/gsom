@@ -15,7 +15,7 @@
 - Генератор платформ — `genPlatform()`, олбанский — `olbanize()`.
 - Эффекты: `boomAt`, `beam`, `stamp`, `makeWin`, `interrupt(kind)`, `otake`.
 - Музыка: УПЧК-амп — `ampPlay(i)`/`ampStop()`, треки в `TRACKS` (SPEC §6.12). Мелодии только свои.
-- Режимы задаются классами на body: `popyach`, `silly`, `razupl`, `olb`, `shake`, `disco`.
+- Режимы задаются классами на body: `popyach`, `silly`, `razupl`, `olb`, `shake`, `disco`, `calm` (офисный режим без анимаций, выбирается на стартовом дисклеймере).
 
 ## Коммиты
 - Все коммиты в этом репозитории пишутся через скилл `pyshch-commit` (лежит в `.claude/skills/pyshch-commit/`), даже если просят просто «закоммить».

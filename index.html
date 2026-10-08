@@ -252,12 +252,31 @@
   .interrupt.zoh .big { position: relative; font-size: clamp(34px, 9vw, 110px); color: #f00; background: #000; padding: 6px 16px; border: 6px solid #0f0; animation: blink .2s steps(2) infinite; }
   @keyframes zoom { from { transform: scale(4) rotate(20deg); } to { transform: none; } }
 
-  #start { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(0,0,0,.78); cursor: pointer; padding: 16px; }
-  #start button {
-    font: inherit; font-size: clamp(26px, 7vw, 72px); font-weight: 900; padding: 20px 32px;
-    background: #f0f; color: #ff0; border: 10px outset #0f0; cursor: pointer;
-    animation: wobble .3s ease-in-out infinite alternate, hue .7s linear infinite;
+  /* стартовый экран: дисклеймер о вспышках. Сам он не мигает и не трясётся — по-честному */
+  #start { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(0,0,0,.86); padding: 16px; overflow-y: auto; }
+  #start .warn { width: min(560px, 100%); background: #c0c0c0; color: #000; border: 3px outset #fff; box-shadow: 8px 8px 0 #f0f; transform: rotate(-.6deg); font-size: 14px; line-height: 1.35; }
+  #start .warn h2 { margin: 0; padding: 6px 10px; background: linear-gradient(90deg, #000080, #1084d0); color: #fff; font-size: clamp(15px, 2.6vw, 20px); }
+  #start .warn .body { padding: 10px 14px; display: grid; gap: 8px; }
+  #start .warn .by { font-style: italic; color: #303; }
+  #start .warn .rating { display: flex; gap: 10px; align-items: center; }
+  #start .warn .rating b { flex: none; background: #fff; border: 3px solid #000; padding: 2px 8px; font-size: 20px; font-weight: 900; text-align: center; line-height: 1; }
+  #start .warn .rating b small { display: block; font-size: 10px; }
+  #start .warn .serious { background: #fff; border: 2px solid #c00; padding: 8px 10px; font-size: 15px; }
+  #start .warn ul { margin: 0; padding-left: 20px; }
+  #start .warn .fine { font-size: 11px; color: #333; }
+  #start .warn .os { background: #ff0; padding: 4px 8px; font-weight: 700; }
+  #start .warn .go { position: sticky; bottom: 0; display: grid; gap: 8px; padding: 10px 14px; background: #c0c0c0; border-top: 2px groove #fff; }
+  #start button { font: inherit; font-weight: 900; cursor: pointer; padding: 10px 16px; }
+  #start #go { font-size: clamp(22px, 5vw, 34px); background: #f0f; color: #ff0; border: 8px outset #0f0; }
+  #start #calm { font-size: 16px; background: #e0ffe0; color: #000; border: 4px outset #fff; }
+  #start button.pref { outline: 4px solid #ff0; outline-offset: 2px; }
+  /* офисный режим: без мигания, тряски и прочей анимации; JS-полёты и звук остаются */
+  @media (max-height: 520px) and (orientation: landscape) {
+    #start .warn .go { grid-template-columns: 1fr 1fr; padding: 6px 10px; }
+    #start #go { font-size: 20px; border-width: 5px; padding: 6px 10px; }
+    #start #calm { font-size: 14px; padding: 6px 10px; }
   }
+  body.calm, body.calm *, body.calm *::before, body.calm *::after { animation: none !important; }
 
   .shake { animation: shake .15s linear 3; }
   @keyframes shake { 25% { transform: translate(8px, -6px); } 50% { transform: translate(-8px, 6px); } 75% { transform: translate(6px, 8px); } }
@@ -418,7 +437,34 @@
   <div class="btns"><button id="ampPrev" type="button">⏮</button><button id="ampPlay" type="button">▶</button><button id="ampNext" type="button">⏭</button></div>
 </div>
 
-<div id="start"><button type="button">ЖМИ ЧТОБ ПЫЩЬ 💨</button></div>
+<div id="start">
+  <div class="warn" role="dialog" aria-labelledby="warnT">
+    <h2 id="warnT">⚠️ ВНИМАНИЕ!!!11 ПРЕДУПРЕЖДЕНИЕ О СВЕТОЧУВСТВИТЕЛЬНОСТИ</h2>
+    <div class="body">
+      <div class="by">Согласовано с Леониде, отревьюено котэ, Онотоле уже знает.</div>
+      <div class="rating"><b>UPCHK<br>146+<small>одобряе</small></b><span>Содержит: попячтсо, спам, котэ, синергию, неожиданную испанскую инквизицию.</span></div>
+      <div class="serious"><b>Серьёзно, без шуток.</b> Сайт мигает, трясётся, крутится и издаёт резкие звуки. У небольшого числа людей вспышки и мелькание могут вызвать эпилептический припадок, даже если раньше такого не было. Если почувствуете головокружение, подёргивание мышц, потерю ориентации или дискомфорт, сразу закройте вкладку.</div>
+      <div class="os" id="osCalm" hidden>Ваша ОС попросила поспокойнее — мы заметили и советуем офисный режим.</div>
+      <div><b>Также платформа может вызвать:</b>
+        <ul>
+          <li>непреодолимое желание попячиться;</li>
+          <li>синергию до 146%;</li>
+          <li>внезапную испанскую инквизицию (её никто не ждёт);</li>
+          <li>олбанский головного мозга;</li>
+          <li>миграцию в микросервисы;</li>
+          <li>желание сказать «Ни!»;</li>
+          <li>спонтанный деплой в пятницу;</li>
+          <li>понимание, что такое ИИИ (не гарантируется).</li>
+        </ul>
+      </div>
+      <div class="fine">Продолжая, вы принимаете EULA (End User Ololo Agreement), которое никто не читал. Платформа не несёт ответственности за потерю кокосов, монолитов и уныния.</div>
+    </div>
+    <div class="go">
+      <button type="button" id="go">ЖМИ ЧТОБ ПЫЩЬ 💨</button>
+      <button type="button" id="calm">🧘 пыщь без вспышек (офисный режим)</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (() => {
@@ -968,7 +1014,7 @@
     if (P.drums) for (const ch of at(P.drums, i)) if (ch !== ".") ampDrum(ch, t);
     const delay = Math.max(0, t - ctx.currentTime);
     if (P.fx) for (const ch of at(P.fx, i)) if (ch !== ".") ampFx(ch, delay);
-    if (i % 4 === 0) setTimeout(() => { if (amp.on) center.animate([{ transform: "scale(1.06)" }, { transform: "none" }], 160); }, delay * 1000);
+    if (i % 4 === 0) setTimeout(() => { if (amp.on && !document.body.classList.contains("calm")) center.animate([{ transform: "scale(1.06)" }, { transform: "none" }], 160); }, delay * 1000);
     if (i % (16 * (tr.sayEvery || 4)) === 0 && tr.say) {
       const line = tr.say[amp.say++ % tr.say.length];
       setTimeout(() => { if (amp.on) speak(line); }, delay * 1000);
@@ -1041,7 +1087,7 @@
     document.body.appendChild(b);
     setTimeout(() => b.remove(), 800);
   }
-  function shake() { document.body.classList.remove("shake"); void document.body.offsetWidth; document.body.classList.add("shake"); }
+  function shake() { if (document.body.classList.contains("calm")) return; document.body.classList.remove("shake"); void document.body.offsetWidth; document.body.classList.add("shake"); }
   function edgePoint() {
     const s = Math.floor(rnd(0, 4));
     return s === 0 ? [rnd(0, W()), 0] : s === 1 ? [W(), rnd(0, H())] : s === 2 ? [rnd(0, W()), H()] : [0, rnd(0, H())];
@@ -1334,7 +1380,13 @@
 
   // ================= СТАРТ / ЗВУК =================
   const start = document.getElementById("start");
-  start.addEventListener("click", () => {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.getElementById("osCalm").hidden = false;
+    const c = document.getElementById("calm"); c.classList.add("pref"); c.focus();
+  }
+  start.addEventListener("click", e => {
+    const btn = e.target.closest("button"); if (!btn) return; // клик по тексту дисклеймера не запускает вспышки
+    if (btn.id === "calm") document.body.classList.add("calm");
     unlockAudio();
     start.remove();
     fart(); speak("великий онотоле! платформа ии ололо");
