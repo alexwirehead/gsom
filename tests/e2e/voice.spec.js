@@ -14,6 +14,18 @@ test("дисктоячка спрашивает про бубнёж, попап 
     return r.left < a.right && r.right > a.left && r.top < a.bottom && r.bottom > a.top;
   });
   expect(overlap, "попап закрыл плеер").toBe(false);
+  // печати Онотоле, взрывы, вставки и другие окна не должны зашлёпывать вопрос
+  const covered = await page.evaluate(() => {
+    const r = document.querySelector(".win.voiceask").getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    return ["stamp", "boom", "interrupt", "win", "beam"].filter(cls => {
+      const e = document.createElement("div"); e.className = cls;
+      Object.assign(e.style, { position: "fixed", left: cx - 50 + "px", top: cy - 50 + "px", width: "100px", height: "100px", animation: "none", opacity: "1" });
+      document.body.appendChild(e);
+      const top = document.elementFromPoint(cx, cy); e.remove();
+      return !top.closest(".win.voiceask");
+    });
+  });
+  expect(covered, "что-то легло поверх Бубнилки").toEqual([]);
   await testInfo.attach(`bubnilka-${testInfo.project.name}`, { body: await page.screenshot(), contentType: "image/png" });
 });
 

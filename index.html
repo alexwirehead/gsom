@@ -187,6 +187,8 @@
     position: fixed; z-index: 13; width: min(330px, calc(100vw - 16px)); background: #c0c0c0; border: 3px outset #fff;
     font-family: Tahoma, "MS Sans Serif", sans-serif; font-size: 14px; box-shadow: 6px 6px 0 #000;
   }
+  /* Бубнилка ждёт ответа: выше печатей (16), взрывов (15), других окон и вставок (25), но ниже стартового дисклеймера (30) */
+  .win.voiceask { z-index: 28; }
   .win .bar { background: linear-gradient(90deg, #000080, #1084d0); color: #fff; font-weight: 700; padding: 3px 6px; display: flex; justify-content: space-between; gap: 8px; }
   .win .bar span { cursor: pointer; background: #c0c0c0; color: #000; padding: 0 6px; border: 2px outset #fff; }
   .win .body { padding: 12px; display: flex; gap: 10px; align-items: center; }
