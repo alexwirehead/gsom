@@ -1,4 +1,5 @@
-"""Smoke-тест GSOM EE: открывает платформу на трёх экранах, жмёт кнопки, проверяет консоль.
+"""Smoke-тест GSOM EE: открывает платформу на трёх экранах, жмёт кнопки, проверяет консоль
+и офисный режим без вспышек.
 
 pip install playwright && playwright install chromium
 python3 tests/smoke.py
@@ -19,13 +20,25 @@ with sync_playwright() as p:
         errors = []
         page.on("pageerror", lambda e: errors.append(str(e)))
         page.goto(URL)
-        # force=True: кнопки анимированы и никогда не становятся «stable»
-        page.click("#start button", force=True)
+        # force=True: под кнопками анимированный фон, Playwright не дождётся «stable»
+        page.click("#go", force=True)
         page.wait_for_timeout(2500)
-        for sel in ["#olb", "#beams", "#walk", "#gen"]:
+        for sel in ["#olb", "#beams", "#walk", "#gen", "#disco"]:
             page.click(sel, force=True)
         page.wait_for_timeout(1000)
         page.screenshot(path=str(OUT / f"{name}.png"))
+
+        # офисный режим: после #calm ни одной CSS-анимации
+        calm = browser.new_page(viewport={"width": w, "height": h})
+        calm.on("pageerror", lambda e: errors.append(str(e)))
+        calm.goto(URL)
+        calm.click("#calm", force=True)
+        calm.wait_for_timeout(1500)
+        moving = calm.evaluate("""[document.body, ...document.body.querySelectorAll('*')]
+            .filter(e => getComputedStyle(e).animationName !== 'none').length""")
+        if moving:
+            errors.append(f"офисный режим: {moving} элементов всё ещё анимированы")
+
         status = "✅ Онотоле одобряе" if not errors else f"❌ Онотоле негодуе: {errors}"
         print(f"{name:6} {status}")
         failed |= bool(errors)

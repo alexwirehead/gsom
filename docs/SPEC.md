@@ -1,7 +1,7 @@
 # ПЛАТФОРМА-ИИ-ПЛАТФОРМА — техническая спецификация
 
 Вырвиглазный сайт-шутка в стиле Упячки про энтерпрайз-баззворды, ИИ-платформы, Онотоле, падонков и Монти Пайтона.
-Документ описывает, как устроена текущая версия `platforma-ii.html` (~980 строк, ~68 КБ), чтобы дальше допиливать её через Claude Code.
+Документ описывает, как устроена текущая версия `index.html` (~1400 строк, ~105 КБ), чтобы дальше допиливать её через Claude Code.
 
 ---
 
@@ -22,7 +22,7 @@
 <head>
   <meta viewport ... viewport-fit=cover>
   <link rel=icon> — эмодзи 💩 через data:SVG
-  <style> — весь CSS (строки ~9–280)
+  <style> — весь CSS (строки ~8–360)
 <body>
   .marquee.top / .marquee.bot      — бегущие строки
   .pepyaka                          — SVG-человечек «пепякодэнс»
@@ -35,12 +35,13 @@
   .center > h1                      — «GSOM» (#h1a) с бейджем «EE» (#h1b), расшифровка #gsomx,
                                       слоган .tagline и меняющийся подзаголовок #sub
   #popyach                          — убегающая кнопка ПОПЯЧЬСЯ
-  .controls                         — кнопки: генератор, лучи, глупый деплой, олбанский, звук
+  .controls                         — кнопки: генератор, лучи, глупый деплой, олбанский, дисктоячка, звук
+  #amp                              — окно плеера УПЧК-амп (статичное, hidden, §6.12)
   #start                            — стартовый оверлей: дисклеймер .warn и кнопки #go «ЖМИ ЧТОБ ПЫЩЬ» / #calm «без вспышек»
-  <script> — весь JS в одном IIFE (строки ~350–980)
+  <script> — весь JS в одном IIFE (строки ~470–1410)
 ```
 
-Динамически создаются и удаляются: `.fly`, `.emoji`, `.boom`, `.beam`, `.stamp`, `.win`, `.interrupt`.
+Динамически создаются и удаляются: `.fly`, `.emoji`, `.boom`, `.beam`, `.stamp`, `.win`, `.interrupt`, `.ufofly`.
 
 ---
 
@@ -87,10 +88,11 @@
 | `olb` | «учи олбанский» | подсветка кнопки (сам текст меняет JS) |
 | `disco` | УПЧК-амп играет | кнопка «дисктоячка» подсвечена, эквалайзер прыгает, пепякомэн танцует быстрее |
 | `shake` | `shake()` | тряска 3×150мс; перезапускается через reflow-трюк `void offsetWidth` |
+| `calm` | кнопка `#calm` на стартовом дисклеймере | офисный режим: `animation: none !important` на body и всём внутри; `shake()` и пульс `.center` в JS молчат. Ставится один раз и не снимается |
 
 ### 3.4 Ключевые анимации
 
-`bgmove` (полосатый фон), `run` (бегущие строки), `wobble` + `hue` (заголовок), `blink`, `silly`, `razupl`, `armL/armR/bounce` (пепякомэн), `up` (автоскролл креатиффа), `spin` (эмодзи), `boom`, `beamfade`, `stampin`, `ufo`, `zoom`, `shake`, `shakeflip` (тряска в перевёрнутом режиме).
+`bgmove` (полосатый фон), `run` (бегущие строки), `wobble` + `hue` (заголовок), `blink`, `silly`, `razupl`, `armL/armR/bounce` (пепякомэн), `up` (автоскролл креатиффа), `spin` (эмодзи), `boom`, `beamfade`, `stampin`, `ufo`, `zoom`, `shake`, `shakeflip` (тряска в перевёрнутом режиме), `hung` (дрожь зависшего окна), `winfall`/`winkick`/`winsync`/`winufo`/`winescal` (уходы окон), `eq` (эквалайзер плеера). Все они выключаются в `body.calm`.
 
 ### 3.5 Брейкпоинты
 
@@ -122,9 +124,10 @@ mq()        // текущее значение --mq в px
 |-----------|-----------|
 | `olb` | режим олбанского |
 | `silly` | режим глупого деплоя (физика прыжков у летающего текста) |
-| `ctx`, `muted`, `noiseBuf` | аудио |
+| `ctx`, `muted`, `noiseBuf`, `unlocked` | аудио; `unlocked` — пустой буфер для iOS уже проигран |
+| `amp` | состояние УПЧК-ампа: `{on, ti, step, next, timer, gain, parts, say, len, wake, slept, lastT, lastAt}` (§6.12) |
 | `cnt` | счётчик «Платформ» |
-| `flyers[]` | массив летающих надписей `{el, x, y, vx, vy, rot, vr, wob, ws}` |
+| `flyers[]` | массив летающих надписей `{el, x, y, vx, vy, rot, vr, wob, ws, w}` (`w` — кеш ширины, §10.1) |
 | `dodges` | счётчик уклонений кнопки ПОПЯЧЬСЯ |
 | `li`, `ri`, `ti` | индексы ротации лога, отзывов, заголовков вкладки |
 | `clopTimer` | интервал кокосового цоканья |
@@ -286,10 +289,11 @@ mq()        // текущее значение --mq в px
 | `musicBox()` | 12 triangle-нот на 3/4 (балет) |
 | `clop()` | шумовой буфер `noise()` (генерируется один раз) через два bandpass (кокосы) |
 | `ampNote()`, `ampDrum()`, `ampFx()` | инструменты секвенсора УПЧК-амп, пишут в `amp.gain` (§6.12) |
+| `unlockAudio()` / `wake()` | создают и будят `AudioContext`, iOS-нюансы (§6.12) |
 | `speak(text)` | `SpeechSynthesisUtterance`, `ru-RU`, случайные rate 0.8–1.6 и pitch 0–2, `%username%` → «юзернейм» |
 
 Циклы: `loopSounds()` — случайный звук каждые 0.4–1.5с (из них пердёж 3/8), `loopSpeech()` — каждые 5–11с.
-Кнопка mute выставляет `muted` и вызывает `speechSynthesis.cancel()`.
+Пока играет УПЧК-амп, `loopSounds()` срабатывает в 15% случаев, а `loopSpeech()` молчит. Кнопка mute выставляет `muted`, вызывает `speechSynthesis.cancel()` и `ampStop()`; при снятии mute контекст будится через `wake()`.
 
 ---
 
@@ -299,7 +303,7 @@ mq()        // текущее значение --mq в px
 2. Клик по кнопке в `#start` (клик по тексту дисклеймера ничего не делает):
    - `#calm` сначала ставит `body.calm` — офисный режим: `animation: none` на body и всём внутри, `shake()` и пульс `.center` молчат, звук и JS-полёты работают;
    - при `prefers-reduced-motion: reduce` дисклеймер показывает `#osCalm` и ставит фокус на `#calm`;
-   - создаётся `AudioContext`;
+   - `unlockAudio()` создаёт `AudioContext` (iOS-нюансы — §6.12);
    - звучат пердёж и «великий онотоле! платформа ии ололо»;
    - +0.5с — `loopSounds`;
    - +2.5с — первое окно;
@@ -335,7 +339,7 @@ mq()        // текущее значение --mq в px
 5. **Мёртвый код в `musicBox()`:** выражение `(i % 3 === 0 ? 1 : 1)` ничего не делает.
 6. **Олбанский не откатывается** для уже сгенерированных строк лога, каментов и открытых окон.
 7. **Шрифт.** Comic Sans есть только на Windows и macOS. На Android и Linux подставляется что-то другое (в headless Chromium это был serif). Можно встроить Comic Neue как base64 woff2 в `@font-face`: файл вырастет примерно на 30–60 КБ, зато будет одинаково везде.
-8. **Синтез речи на iOS Safari** иногда молчит в фоновых циклах (не из обработчика жеста). Голоса `ru-RU` зависят от ОС.
+8. **Синтез речи на iOS Safari** иногда молчит в фоновых циклах (не из обработчика жеста). Голоса `ru-RU` зависят от ОС. Засыпание самого Web Audio на iOS уже лечится (§6.12), речь — нет.
 9. ~~**Фоточувствительность.**~~ Частично исправлено: на старте дисклеймер в духе игровых предупреждений (серьёзный блок о припадках — без шуток и олбанского), офисный режим `body.calm` и подсказка при `prefers-reduced-motion`. Исходная заметка: мигание в `blink .2s`/`.25s steps(2)` даёт примерно 2–2.5 вспышки в секунду, это под порогом WCAG (3/с). При добавлении эффектов держать вспышки не чаще 3 раз в секунду. Стоит подумать о строчке-предупреждении на стартовом экране и о режиме `prefers-reduced-motion`, который отключает мигание и тряску.
 10. **Доступность** сознательно принесена в жертву (это шутка), но у кнопок есть `type="button"`, а у пепякомэна — `aria-hidden`.
 
@@ -378,6 +382,10 @@ mq()        // текущее значение --mq в px
 4. Если это режим — класс на body.
 5. На телефоне кнопки переносятся автоматически. Если рядов станет больше двух, увеличить `bottom` у `.controls` в медиазапросе ≤700px.
 
+**Новая анимация.** CSS-анимации в офисном режиме `body.calm` выключаются сами. Всё, что двигается из JS (`element.animate()`, тряска, мигание таймером), должно само проверять `document.body.classList.contains("calm")`. Иначе человек, который попросил без вспышек, их получит.
+
+**Стартовый дисклеймер.** Абсурд — вокруг, а блок `.serious` остаётся серьёзным: без шуток, без олбанского, с советом закрыть вкладку при симптомах.
+
 ---
 
 ## 13. Предлагаемая структура репозитория для дальнейшей разработки
@@ -391,7 +399,7 @@ src/
   js/
     utils.js  lore.js  olbanize.js  generator.js
     audio.js  flyers.js  effects.js  popups.js  interrupts.js  main.js
-build.mjs           — склеивает JS в IIFE и инлайнит в index.html → dist/platforma-ii.html
+build.mjs           — склеивает JS в IIFE и инлайнит в src/index.html → dist/index.html
 tests/smoke.py      — playwright smoke-тест
 ```
 
@@ -401,28 +409,14 @@ tests/smoke.py      — playwright smoke-тест
 
 ## 14. Smoke-тест (Playwright)
 
-```python
-# pip install playwright && playwright install chromium
-from playwright.sync_api import sync_playwright
+Тест лежит в `tests/smoke.py`:
 
-VIEWPORTS = {"desk": (1440, 900), "phone": (390, 844), "land": (844, 390)}
-
-with sync_playwright() as p:
-    b = p.chromium.launch()
-    for name, (w, h) in VIEWPORTS.items():
-        pg = b.new_page(viewport={"width": w, "height": h})
-        errs = []
-        pg.on("pageerror", lambda e: errs.append(str(e)))
-        pg.goto("file:///ABS/PATH/platforma-ii.html")
-        pg.click("#go", force=True)   # force: под кнопкой анимированный фон, Playwright не дождётся «stable»
-        pg.wait_for_timeout(2500)
-        for sel in ["#olb", "#beams", "#walk", "#gen"]:
-            pg.click(sel, force=True)
-        pg.wait_for_timeout(1000)
-        pg.screenshot(path=f"{name}.png")
-        assert not errs, (name, errs)
-    b.close()
+```bash
+pip install playwright && playwright install chromium
+python3 tests/smoke.py
 ```
+
+Он открывает `index.html` на 1440×900, 390×844 и 844×390, жмёт `#go` на стартовом дисклеймере, потом `#olb`, `#beams`, `#walk`, `#gen`, `#disco`, проверяет, что в консоли нет ошибок, и кладёт скриншоты в `tests/*.png`. Второй проход стартует через `#calm` и проверяет, что в офисном режиме не осталось ни одной CSS-анимации.
 
 Важно: все клики по анимированным элементам делать с `force=True`, иначе Playwright ждёт «стабильности» элемента бесконечно.
 
