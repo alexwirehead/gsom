@@ -8,7 +8,10 @@
 <style>
   :root { --mq: 44px; --mqf: 26px; --gap: 12px; }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; overflow: hidden; cursor: crosshair; overscroll-behavior: none; }
+  /* курсор: жёлтая стрелка с чёрной обводкой и белым гало — видна на любой полосе фона; на кнопках — зелёная со звездой */
+  :root { --cur: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M4 3 L4 25 L9.5 19.5 L13.5 28.5 L18 26.5 L14 17.5 L21.5 17.5 Z' fill='none' stroke='%23fff' stroke-width='5' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25 L9.5 19.5 L13.5 28.5 L18 26.5 L14 17.5 L21.5 17.5 Z' fill='%23ff0' stroke='%23000' stroke-width='2.2' stroke-linejoin='round'/%3E%3C/svg%3E") 4 3, default; --cur-click: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M4 3 L4 25 L9.5 19.5 L13.5 28.5 L18 26.5 L14 17.5 L21.5 17.5 Z' fill='none' stroke='%23fff' stroke-width='5' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25 L9.5 19.5 L13.5 28.5 L18 26.5 L14 17.5 L21.5 17.5 Z' fill='%230f0' stroke='%23000' stroke-width='2.2' stroke-linejoin='round'/%3E%3Cpath d='M25 2 L26.5 6 L30.5 6.5 L27.5 9 L28.5 13 L25 10.8 L21.5 13 L22.5 9 L19.5 6.5 L23.5 6 Z' fill='%23f0f' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E") 4 3, pointer; }
+  html, body { margin: 0; height: 100%; overflow: hidden; cursor: var(--cur); overscroll-behavior: none; }
+  button, .win .bar span, #popyach { cursor: var(--cur-click) !important; }
   body {
     font-family: "Comic Sans MS", "Comic Neue", "Chalkboard SE", cursive;
     background: repeating-linear-gradient(45deg, #ff00ff 0 30px, #00ff00 30px 60px, #ffff00 60px 90px, #00ffff 90px 120px);
@@ -184,6 +187,8 @@
     position: fixed; z-index: 13; width: min(330px, calc(100vw - 16px)); background: #c0c0c0; border: 3px outset #fff;
     font-family: Tahoma, "MS Sans Serif", sans-serif; font-size: 14px; box-shadow: 6px 6px 0 #000;
   }
+  /* Бубнилка ждёт ответа: выше печатей (16), взрывов (15), других окон и вставок (25), но ниже стартового дисклеймера (30) */
+  .win.voiceask { z-index: 28; }
   .win .bar { background: linear-gradient(90deg, #000080, #1084d0); color: #fff; font-weight: 700; padding: 3px 6px; display: flex; justify-content: space-between; gap: 8px; }
   .win .bar span { cursor: pointer; background: #c0c0c0; color: #000; padding: 0 6px; border: 2px outset #fff; }
   .win .body { padding: 12px; display: flex; gap: 10px; align-items: center; }
@@ -222,7 +227,7 @@
   .amp .btns { padding-bottom: 8px; }
   .amp .lyric { margin: 0 8px 6px; min-height: 1.4em; padding: 0 6px; background: #000; color: #666; font-weight: 900; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
   .amp .lyric .on { color: #ff0; }
-  .amp .btns button { font-size: 16px; padding: 2px 14px; }
+  .amp .btns button { font-size: 16px; padding: 2px 10px; }
   .amp .btns button.on { border-style: inset; background: #ff0; }
   .controls .disco { background: #0ff; border-color: #000080; transform: rotate(-2deg); }
   body.disco .controls .disco { background: #00f; color: #fff; }
@@ -278,6 +283,12 @@
     #start .warn .go { grid-template-columns: 1fr 1fr; padding: 6px 10px; }
     #start #go { font-size: 20px; border-width: 5px; padding: 6px 10px; }
     #start #calm { font-size: 14px; padding: 6px 10px; }
+  }
+  @media (max-height: 520px) and (orientation: landscape) {
+    .win.voiceask { width: min(500px, 58vw); font-size: 12px; }
+    .win.voiceask .body { padding: 6px 10px; }
+    .win.voiceask .btns { flex-wrap: nowrap; padding: 0 8px 8px; gap: 4px; }
+    .win.voiceask button { padding: 3px 6px; font-size: 11px; }
   }
   body.calm, body.calm *, body.calm *::before, body.calm *::after { animation: none !important; }
 
@@ -438,7 +449,7 @@
   <div class="bar"><div>УПЧК-амп.exe</div><span id="ampX">×</span></div>
   <div class="screen"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><div class="ticker"><span id="ampTitle"></span></div></div>
   <div class="lyric" id="ampLyric" aria-live="off"></div>
-  <div class="btns"><button id="ampPrev" type="button">⏮</button><button id="ampPlay" type="button">▶</button><button id="ampNext" type="button">⏭</button><button id="ampShuf" type="button" title="шаффл">🔀</button></div>
+  <div class="btns"><button id="ampPrev" type="button">⏮</button><button id="ampPlay" type="button">▶</button><button id="ampNext" type="button">⏭</button><button id="ampShuf" type="button" title="шаффл">🔀</button><button id="ampVoice" type="button" title="бубнение включено">🗣️</button></div>
 </div>
 
 <div id="start">
@@ -1014,6 +1025,7 @@
     o.start(t); lfo.start(t); o.stop(t + dur); lfo.stop(t + dur);
   }
   function sweep(type, f1, f2, dur, vol, vib) {
+    if (!live()) return;
     const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type;
     o.frequency.setValueAtTime(f1, t);
@@ -1035,6 +1047,7 @@
     sweep("sine", up ? rnd(600, 900) : rnd(1800, 2600), up ? rnd(1800, 2800) : rnd(500, 800), rnd(.3, .9), .25, rnd(6, 12));
   }
   function tone(type, freq, start, dur, vol) {
+    if (!live()) return;
     const t = ctx.currentTime + start, o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type; o.frequency.value = freq;
     g.gain.setValueAtTime(0.0001, t);
@@ -1078,7 +1091,7 @@
     });
   }
   function speak(text) {
-    if (muted || !("speechSynthesis" in window)) return;
+    if (muted || !("speechSynthesis" in window) || (amp.on && !amp.voice)) return; // «без бубнения» глушит речь, пока играет музыка
     const u = new SpeechSynthesisUtterance(text.replace(/%username%/gi, "юзернейм"));
     u.lang = "ru-RU"; u.rate = rnd(.8, 1.6); u.pitch = rnd(0, 2);
     u.onend = () => { if (ctx && !muted && ctx.state !== "running") Promise.resolve(ctx.resume()).catch(() => {}); }; // iOS прерывает Web Audio ради речи
@@ -1097,7 +1110,7 @@
 
   // ================= УПЧК-АМП (секвенсор) =================
   // Ноты ставятся на ctx.currentTime с упреждением: раз в 25мс планируем всё, что попадает в ближайшие 120мс.
-  const amp = { on: false, ti: 0, step: 0, next: 0, timer: null, gain: null, parts: null, say: 0, kar: 0, shuffle: false, wake: 0, slept: null, lastT: 0, lastAt: 0 };
+  const amp = { on: false, ti: 0, step: 0, next: 0, timer: null, gain: null, parts: null, say: 0, kar: 0, shuffle: false, voice: true, voiceAsked: false, wake: 0, slept: null, lastT: 0, lastAt: 0 };
   const NOTE_IX = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
   const freq = n => { const m = /^([A-G])(#?)(\d)$/.exec(n); return m ? 440 * 2 ** ((NOTE_IX[m[1]] + (m[2] ? 1 : 0) + 12 * (+m[3] + 1) - 69) / 12) : 0; };
   const parsePart = p => p ? p.split(/\s+/).filter(x => x && x !== "|") : null;
@@ -1185,7 +1198,7 @@
     if (i % (bar * (tr.sayEvery || 4)) === 0 && tr.say) {
       const line = tr.say[amp.say++ % tr.say.length], syl = sylls(line);
       const step = Math.min(sp * 2, bar * sp * (tr.sayEvery || 4) / (syl.length + 1)); // строка успевает до следующей
-      if (DUCKY) chipSay(syl, t, step); // iOS приглушает музыку на время речи — поём 8-битными слогами
+      if (DUCKY && amp.voice) chipSay(syl, t, step); // iOS приглушает музыку на время речи — поём 8-битными слогами
       setTimeout(() => { if (!amp.on) return; karaoke(syl, step); if (!DUCKY) speak(line); }, delay * 1000);
     }
   }
@@ -1365,13 +1378,15 @@
 
   // ================= ОКНА =================
   const ampWin = document.getElementById("amp");
-  function makeWin(icon, msg, btns, onAny, note) {
-    if (document.querySelectorAll(".win:not(.amp)").length >= (mobile() ? 3 : 7)) return;
+  function makeWin(icon, msg, btns, onAny, note, opts = {}) {
+    const open = document.querySelectorAll(".win:not(.amp)");
+    if (open.length >= (mobile() ? 3 : 7)) { if (!opts.force) return; open[0].remove(); } // force: важное окно вытесняет старейшее
+    
     const w = document.createElement("div");
     w.className = "win";
     const bar = document.createElement("div"); bar.className = "bar";
     const ttl = document.createElement("div");
-    ttl.textContent = pick(["ИИ-Платформа.exe","Синергия.exe","1С:Платформа","SPAM.exe","Министерство.exe","УПЧК.exe","Онотоле.exe","Креатифф.exe"]);
+    ttl.textContent = opts.title || pick(["ИИ-Платформа.exe","Синергия.exe","1С:Платформа","SPAM.exe","Министерство.exe","УПЧК.exe","Онотоле.exe","Креатифф.exe"]);
     const x1 = document.createElement("span"); x1.textContent = "×";
     bar.append(ttl, x1);
     const body = document.createElement("div"); body.className = "body";
@@ -1392,6 +1407,7 @@
       setTimeout(randomPopup, 600);
     };
     w.append(bar, body, bb);
+    if (opts.cls) w.classList.add(opts.cls);
     w.style.visibility = "hidden";
     document.body.appendChild(w);
     placeWin(w);
@@ -1404,12 +1420,12 @@
   function placeWin(w) {
     const avoid = [document.querySelector(".controls"), ampWin.hidden ? null : ampWin].filter(Boolean).map(e => e.getBoundingClientRect());
     const ww = w.offsetWidth, wh = w.offsetHeight;
-    let x, y;
-    for (let i = 0; i < 15; i++) {
-      x = rnd(4, Math.max(4, W() - ww - 4));
-      y = rnd(mq() + 4, Math.max(mq() + 4, H() - wh - mq() - 4));
-      if (!avoid.some(r => x < r.right && x + ww > r.left && y < r.bottom && y + wh > r.top)) break;
-    }
+    const x0 = 4, x1 = Math.max(4, W() - ww - 4), y0 = mq() + 4, y1 = Math.max(y0, H() - wh - mq() - 4);
+    const free = (x, y) => !avoid.some(r => x < r.right && x + ww > r.left && y < r.bottom && y + wh > r.top);
+    let x, y, ok = false;
+    for (let i = 0; i < 15 && !ok; i++) { x = rnd(x0, x1); y = rnd(y0, y1); ok = free(x, y); }
+    // случай не помог — перебираем сеткой, на тесном экране свободное место обычно одно
+    for (let gy = y0; gy <= y1 && !ok; gy += 12) for (let gx = x0; gx <= x1 && !ok; gx += 12) if (free(gx, gy)) { x = gx; y = gy; ok = true; }
     w.style.left = x + "px"; w.style.top = y + "px";
   }
   const WIN_EXITS = [
@@ -1566,12 +1582,36 @@
   }
   document.getElementById("disco").addEventListener("click", () => {
     wake();
-    if (ampWin.hidden) { ampWin.hidden = false; ampPlay(Math.floor(rnd(0, TRACKS.length))); stamp("ДИСКТОЯЧКА!!!11", true); }
+    if (ampWin.hidden) { ampWin.hidden = false; ampPlay(Math.floor(rnd(0, TRACKS.length))); stamp("ДИСКТОЯЧКА!!!11", true); if (!amp.voiceAsked) setTimeout(askVoice, 1700); } // после печати «ДИСКТОЯЧКА», чтобы она не закрыла вопрос
     else { ampStop(); ampWin.hidden = true; }
   });
   ampBtn.addEventListener("click", () => amp.on ? ampStop() : ampPlay(amp.ti));
   document.getElementById("ampPrev").addEventListener("click", () => ampPlay(amp.ti - 1));
   document.getElementById("ampNext").addEventListener("click", () => ampPlay(ampNextIx(amp.ti)));
+  // ===== бубнение: голос поверх музыки можно выключить =====
+  const voiceBtn = document.getElementById("ampVoice");
+  function setVoice(on) {
+    amp.voice = on; amp.voiceAsked = true;
+    voiceBtn.textContent = on ? "🗣️" : "🤐"; voiceBtn.classList.toggle("on", !on);
+    voiceBtn.title = on ? "бубнение включено" : "без бубнения";
+    if (!on && "speechSynthesis" in window) speechSynthesis.cancel();
+  }
+  function askVoice() {
+    if (ampWin.hidden || amp.voiceAsked || document.querySelector(".win.voiceask")) return;
+    const YES = "🤐 ДА!!! ТОЛЬКО МУЗОН", NO = "🗣️ пусть бубнит, я эффективный менеджер", ONO = "🔮 пусть решит Онотоле";
+    makeWin("🎧",
+      "ВНИМАНИЕ!!!11 Обнаружен бубнёж. Поверх трека платформа будет бубнить мемы голосом синтезатора речи. Желаете ДИКО, НЕИСТОВО, НА ВСЕ 146% СИНЕРГИИ наслаждаться чистым 8-битом без бубнения?",
+      [YES, NO, ONO], label => {
+        const off = label === YES || (label === ONO && Math.random() < .5);
+        if (label === ONO) stamp(off ? "ОНОТОЛЕ ВЕЛЕЛ: ТИШИНА!!!11" : "ОНОТОЛЕ ВЕЛЕЛ: БУБНИ!!!11", true);
+        setVoice(!off);
+        const r = voiceBtn.getBoundingClientRect();
+        boomAt(r.left, r.top, off ? pick(["БУБНЁЖ ПОПЯЧЕН!!!", "ТОЛЬКО МУЗОН!!!11", "ТЫЦ-ТЫЦ-ТЫЦ"]) : pick(["БУБНИ, РОБОТ!", "СИНЕРГИЯ ГОЛОСОМ", "ОЛОЛО В МИКРОФОН"]));
+      },
+      "Котэ рекомендует первое. Бубнёж можно вернуть кнопкой 🗣️ в плеере.",
+      { title: "Бубнилка.exe", force: true, cls: "voiceask" });
+  }
+  voiceBtn.addEventListener("click", () => setVoice(!amp.voice));
   const shufBtn = document.getElementById("ampShuf");
   shufBtn.addEventListener("click", () => { amp.shuffle = !amp.shuffle; shufBtn.classList.toggle("on", amp.shuffle); });
   document.getElementById("ampX").addEventListener("click", () => { ampStop(); ampWin.hidden = true; honk(); });

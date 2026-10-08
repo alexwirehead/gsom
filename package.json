@@ -1,0 +1,16 @@
+{
+  "name": "gsom-ee",
+  "private": true,
+  "description": "Тесты GSOM EE. Сам сайт — один index.html без зависимостей, а это — для Совета Онотоле.",
+  "scripts": {
+    "test": "npm run test:static && npm run test:e2e",
+    "test:static": "node --test tests/static/*.test.mjs",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.48.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
