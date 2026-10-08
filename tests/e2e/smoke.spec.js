@@ -27,3 +27,11 @@ test("летающие надписи на месте и с ненулевой �
   expect(w.length).toBeGreaterThanOrEqual(12);
   expect(w.filter(x => x === 0)).toEqual([]);
 });
+
+test("курсор заметный: своя SVG-стрелка, на кнопках — своя", async ({ page }) => {
+  await open(page, null);
+  const c = await page.evaluate(() => ({ body: getComputedStyle(document.body).cursor, btn: getComputedStyle(document.getElementById("go")).cursor }));
+  expect(c.body).toContain("data:image/svg+xml");
+  expect(c.btn).toContain("data:image/svg+xml");
+  expect(c.btn).not.toBe(c.body);
+});

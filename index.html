@@ -8,7 +8,10 @@
 <style>
   :root { --mq: 44px; --mqf: 26px; --gap: 12px; }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; overflow: hidden; cursor: crosshair; overscroll-behavior: none; }
+  /* курсор: жёлтая стрелка с чёрной обводкой и белым гало — видна на любой полосе фона; на кнопках — зелёная со звездой */
+  :root { --cur: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M4 3 L4 25 L9.5 19.5 L13.5 28.5 L18 26.5 L14 17.5 L21.5 17.5 Z' fill='none' stroke='%23fff' stroke-width='5' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25 L9.5 19.5 L13.5 28.5 L18 26.5 L14 17.5 L21.5 17.5 Z' fill='%23ff0' stroke='%23000' stroke-width='2.2' stroke-linejoin='round'/%3E%3C/svg%3E") 4 3, default; --cur-click: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M4 3 L4 25 L9.5 19.5 L13.5 28.5 L18 26.5 L14 17.5 L21.5 17.5 Z' fill='none' stroke='%23fff' stroke-width='5' stroke-linejoin='round'/%3E%3Cpath d='M4 3 L4 25 L9.5 19.5 L13.5 28.5 L18 26.5 L14 17.5 L21.5 17.5 Z' fill='%230f0' stroke='%23000' stroke-width='2.2' stroke-linejoin='round'/%3E%3Cpath d='M25 2 L26.5 6 L30.5 6.5 L27.5 9 L28.5 13 L25 10.8 L21.5 13 L22.5 9 L19.5 6.5 L23.5 6 Z' fill='%23f0f' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E") 4 3, pointer; }
+  html, body { margin: 0; height: 100%; overflow: hidden; cursor: var(--cur); overscroll-behavior: none; }
+  button, .win .bar span, #popyach { cursor: var(--cur-click) !important; }
   body {
     font-family: "Comic Sans MS", "Comic Neue", "Chalkboard SE", cursive;
     background: repeating-linear-gradient(45deg, #ff00ff 0 30px, #00ff00 30px 60px, #ffff00 60px 90px, #00ffff 90px 120px);
