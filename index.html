@@ -220,6 +220,8 @@
   .amp .eq i:nth-child(4) { animation-duration: .35s; } .amp .eq i:nth-child(5) { animation-duration: .45s; }
   @keyframes eq { from { transform: scaleY(.15); } to { transform: scaleY(1); } }
   .amp .btns { padding-bottom: 8px; }
+  .amp .lyric { margin: 0 8px 6px; min-height: 1.4em; padding: 0 6px; background: #000; color: #666; font-weight: 900; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
+  .amp .lyric .on { color: #ff0; }
   .amp .btns button { font-size: 16px; padding: 2px 14px; }
   .controls .disco { background: #0ff; border-color: #000080; transform: rotate(-2deg); }
   body.disco .controls .disco { background: #00f; color: #fff; }
@@ -434,6 +436,7 @@
 <div class="win amp" id="amp" hidden>
   <div class="bar"><div>УПЧК-амп.exe</div><span id="ampX">×</span></div>
   <div class="screen"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><div class="ticker"><span id="ampTitle"></span></div></div>
+  <div class="lyric" id="ampLyric" aria-live="off"></div>
   <div class="btns"><button id="ampPrev" type="button">⏮</button><button id="ampPlay" type="button">▶</button><button id="ampNext" type="button">⏭</button></div>
 </div>
 
@@ -953,7 +956,7 @@
 
   // ================= УПЧК-АМП (секвенсор) =================
   // Ноты ставятся на ctx.currentTime с упреждением: раз в 25мс планируем всё, что попадает в ближайшие 120мс.
-  const amp = { on: false, ti: 0, step: 0, next: 0, timer: null, gain: null, parts: null, say: 0, wake: 0, slept: null, lastT: 0, lastAt: 0 };
+  const amp = { on: false, ti: 0, step: 0, next: 0, timer: null, gain: null, parts: null, say: 0, kar: 0, wake: 0, slept: null, lastT: 0, lastAt: 0 };
   const NOTE_IX = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
   const freq = n => { const m = /^([A-G])(#?)(\d)$/.exec(n); return m ? 440 * 2 ** ((NOTE_IX[m[1]] + (m[2] ? 1 : 0) + 12 * (+m[3] + 1) - 69) / 12) : 0; };
   const parsePart = p => p ? p.split(/\s+/).filter(x => x && x !== "|") : null;
@@ -1016,9 +1019,36 @@
     if (P.fx) for (const ch of at(P.fx, i)) if (ch !== ".") ampFx(ch, delay);
     if (i % 4 === 0) setTimeout(() => { if (amp.on && !document.body.classList.contains("calm")) center.animate([{ transform: "scale(1.06)" }, { transform: "none" }], 160); }, delay * 1000);
     if (i % (16 * (tr.sayEvery || 4)) === 0 && tr.say) {
-      const line = tr.say[amp.say++ % tr.say.length];
-      setTimeout(() => { if (amp.on) speak(line); }, delay * 1000);
+      const line = tr.say[amp.say++ % tr.say.length], syl = sylls(line);
+      const step = Math.min(sp * 2, 16 * sp * (tr.sayEvery || 4) / (syl.length + 1)); // строка успевает до следующей
+      if (DUCKY) chipSay(syl, t, step); // iOS приглушает музыку на время речи — поём 8-битными слогами
+      setTimeout(() => { if (!amp.on) return; karaoke(syl, step); if (!DUCKY) speak(line); }, delay * 1000);
     }
+  }
+  // iOS глушит остальной звук, пока говорит speechSynthesis, и из браузера это не выключить
+  const DUCKY = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const VOWEL = { "а": 900, "я": 900, "о": 600, "ё": 600, "у": 400, "ю": 400, "э": 700, "е": 700, "и": 1100, "ы": 800 };
+  const sylls = line => { const m = line.match(/[^аеёиоуыэюя]*[аеёиоуыэюя]/gi) || [line], tail = line.slice(m.join("").length); m[m.length - 1] += tail; return m; };
+  function chipSay(syl, t, step) { // слог = бип square через «гласный» bandpass, мелодия по пентатонике
+    if (!live()) return;
+    const scale = [440, 523, 587, 659, 784, 880];
+    syl.forEach((chunk, k) => {
+      const v = chunk.toLowerCase().match(/[аеёиоуыэюя]/), at = t + k * step, dur = step * .8;
+      const o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+      const hz = pick(scale);
+      o.type = "square"; o.frequency.setValueAtTime(hz, at); o.frequency.exponentialRampToValueAtTime(hz * .94, at + dur);
+      f.type = "bandpass"; f.frequency.value = v ? VOWEL[v[0]] : 700; f.Q.value = 2.5;
+      g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(.35, at + .01); g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+      o.connect(f); f.connect(g); g.connect(amp.gain); o.start(at); o.stop(at + dur + .02);
+    });
+  }
+  const lyricEl = document.getElementById("ampLyric");
+  function karaoke(syl, step) { // строка в плеере, слоги подсвечиваются в такт
+    lyricEl.textContent = "";
+    const spans = syl.map(c => { const sp = document.createElement("span"); sp.textContent = c; lyricEl.appendChild(sp); return sp; });
+    const tok = ++amp.kar;
+    spans.forEach((sp, k) => setTimeout(() => { if (amp.kar === tok) sp.className = "on"; }, k * step * 1000));
+    setTimeout(() => { if (amp.kar === tok) lyricEl.textContent = ""; }, (spans.length * step + 1.5) * 1000);
   }
   function ampTick() {
     if (!live()) { ampStop(); return; }
@@ -1062,7 +1092,7 @@
   }
   function ampStop(quiet) {
     clearInterval(amp.timer); amp.timer = null;
-    amp.wake++; amp.slept = null;
+    amp.wake++; amp.slept = null; amp.kar++; lyricEl.textContent = "";
     if (amp.on && amp.gain && ctx) { // глушим уже запланированные ноты
       amp.gain.gain.cancelScheduledValues(ctx.currentTime);
       amp.gain.gain.setTargetAtTime(0, ctx.currentTime, .02);
