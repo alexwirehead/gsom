@@ -1014,6 +1014,7 @@
     o.start(t); lfo.start(t); o.stop(t + dur); lfo.stop(t + dur);
   }
   function sweep(type, f1, f2, dur, vol, vib) {
+    if (!live()) return;
     const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type;
     o.frequency.setValueAtTime(f1, t);
@@ -1035,6 +1036,7 @@
     sweep("sine", up ? rnd(600, 900) : rnd(1800, 2600), up ? rnd(1800, 2800) : rnd(500, 800), rnd(.3, .9), .25, rnd(6, 12));
   }
   function tone(type, freq, start, dur, vol) {
+    if (!live()) return;
     const t = ctx.currentTime + start, o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type; o.frequency.value = freq;
     g.gain.setValueAtTime(0.0001, t);

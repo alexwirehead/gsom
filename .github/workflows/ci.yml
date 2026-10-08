@@ -1,0 +1,120 @@
+# Онотоле CI: серьёзные проверки с несерьёзными названиями.
+# Всё, что делает CI, можно запустить локально: npm test (см. CONTRIBUTING.md).
+name: "🛸 Онотоле CI"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: "🔤 Олбанский линтер: лор, треки, вспышки, один файл"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: "📥 Чекаут глагне"
+        uses: actions/checkout@v4
+      - name: "🟢 Node 22 — синергия с долгой поддержкой"
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: "🧪 Статика: такты, ноты, live(), body.calm, запрещённые мемы"
+        run: npm run test:static
+
+  e2e:
+    name: "💨 Попячтсо-тесты · ${{ matrix.project }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desk, phone, land]
+    steps:
+      - name: "📥 Чекаут глагне"
+        uses: actions/checkout@v4
+      - name: "🟢 Node 22"
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: "📦 npm ci — единственная зависимость, и та для тестов"
+        run: npm ci
+      - name: "🌐 Chromium для Совета Онотоле"
+        run: npx playwright install --with-deps chromium
+      - name: "🖱️ ЖМИ ЧТОБ ПЫЩЬ (${{ matrix.project }})"
+        run: npx playwright test --project=${{ matrix.project }}
+      - name: "📸 Скриншоты и трейсы — если что-то попячилось"
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: popyachtso-report-${{ matrix.project }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  commits:
+    name: "💬 Пыщь-коммиты: смешно, но честно"
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: "📥 Чекаут с историей"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: "🔍 Каждый коммит PR — через валидатор pyshch-commit"
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          fail=0
+          for sha in $(git rev-list --no-merges "$BASE..$HEAD"); do
+            git log -1 --format=%B "$sha" > "$RUNNER_TEMP/msg.txt"
+            echo "── $(git log -1 --format='%h %s' "$sha")"
+            if ! python3 .claude/skills/pyshch-commit/scripts/check_message.py "$RUNNER_TEMP/msg.txt"; then
+              echo "::error title=Онотоле негодуе::коммит $sha не прошёл валидатор pyshch-commit"
+              fail=1
+            fi
+          done
+          exit $fail
+
+  verdict:
+    name: "⚖️ Вердикт Онотоле"
+    needs: [static, e2e, commits]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: "🧾 Онотоле изучает результаты (он уже знает, но формальности)"
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, random
+          needs = json.loads(os.environ["NEEDS"])
+          names = {"static": "🔤 Олбанский линтер", "e2e": "💨 Попячтсо-тесты", "commits": "💬 Пыщь-коммиты"}
+          verdicts = {"success": "✅ одобряе", "failure": "❌ негодуе", "cancelled": "🛑 попячилось", "skipped": "💤 не требовалось"}
+          bad = [k for k, v in needs.items() if v["result"] in ("failure", "cancelled")]
+          rows = "\n".join(f"| {names.get(k, k)} | {verdicts.get(v['result'], v['result'])} |" for k, v in needs.items())
+          stamp = "ОНОТОЛЕ НЕГОДУЕ" if bad else "ОНОТОЛЕ ОДОБРЯЕ"
+          stats = [f"Синергия: +{146 if not bad else random.randint(1, 45)}%",
+                   f"Монолитов попячено: {random.randint(1, 146)}",
+                   f"Котэ задеплоено в прод: {random.choice(['1', 'стопицот', 'все'])}",
+                   "Испанскую инквизицию: никто не ждал"]
+          summary = f"## {'❌' if bad else '✅'} {stamp}\n\n| Проверка | Вердикт |\n|---|---|\n{rows}\n\n" + "\n".join(f"- {s}" for s in stats) + "\n"
+          if bad:
+              summary += "\nСкриншоты и трейсы упавших экранов лежат в артефактах `popyachtso-report-*`. Попячься и поправь — это не обидно.\n"
+          open(os.environ["GITHUB_STEP_SUMMARY"], "a").write(summary)
+          print(summary)
+          raise SystemExit(1 if bad else 0)
+          PY

@@ -402,24 +402,24 @@ src/
     utils.js  lore.js  olbanize.js  generator.js
     audio.js  flyers.js  effects.js  popups.js  interrupts.js  main.js
 build.mjs           — склеивает JS в IIFE и инлайнит в src/index.html → dist/index.html
-tests/smoke.py      — playwright smoke-тест
+tests/              — static (node:test) и e2e (Playwright), см. §14
 ```
 
 Сборку можно сделать без зависимостей: `node build.mjs` читает файлы и делает `String.replace` плейсхолдеров. Минификация не нужна.
 
 ---
 
-## 14. Smoke-тест (Playwright)
-
-Тест лежит в `tests/smoke.py`:
+## 14. Тесты и CI
 
 ```bash
-pip install playwright && playwright install chromium
-python3 tests/smoke.py
+npm ci && npx playwright install chromium
+npm test                  # = npm run test:static && npm run test:e2e
 ```
 
-Он открывает `index.html` на 1440×900, 390×844 и 844×390, жмёт `#go` на стартовом дисклеймере, потом `#olb`, `#beams`, `#walk`, `#gen`, `#disco`, проверяет, что в консоли нет ошибок, и кладёт скриншоты в `tests/*.png`. Второй проход стартует через `#calm` и проверяет, что в офисном режиме не осталось ни одной CSS-анимации.
-
-Важно: все клики по анимированным элементам делать с `force=True`, иначе Playwright ждёт «стабильности» элемента бесконечно.
+- **`tests/static/*.test.mjs`** — `node:test`, без браузера, доли секунды. `_site.mjs` читает `index.html`, вычисляет `TRACKS` (данные чистые) и режет функции верхнего уровня IIFE. Проверяют: один файл без внешних адресов и `fetch`; каждая функция с `ctx.create*` начинается с `if (!live()) return;` (исключения — `unlockAudio`, `noise`); `blink` не быстрее .2s (§10.9); каждый `element.animate()` проверяет `calm`; блок `.serious` на месте и без шуток; запрещённые мемы (§11); треки — такты, ноты, барабаны, форма, длительность 1–3 минуты, бонус последним.
+- **`tests/e2e/*.spec.js`** — `@playwright/test` 1.48.2, проекты `desk`/`phone`/`land` (§1.4). `fixtures.js`: любая ошибка консоли валит тест, `probeAudio()` подменяет `AudioContext` и считает источники звука и фильтры, глушит `speechSynthesis` и записывает фразы; `ios: true` добавляет `navigator.audioSession`. Спеки: `smoke`, `disclaimer`, `amp`, `ios` (засыпание контекста через `ctx.suspend()`), `ducking` (UA айфона → слоги бипами), `invariants` (12 секунд хаоса: лимиты §9 и ни одного запроса мимо `file://`).
+- E2E на CommonJS, а не ESM: ESM-загрузчик Playwright 1.48 зависает на Node 24.
+- Все клики по анимированным элементам — с `force: true`, иначе Playwright ждёт «стабильности» бесконечно.
+- CI: `.github/workflows/ci.yml` — статика, e2e матрицей по трём экранам с артефактами при падении, валидатор коммитов PR и итоговая джоба «⚖️ Вердикт Онотоле» (CONTRIBUTING.md).
 
 Ручная проверка на iPhone (Playwright не повторяет аудиостек iOS): дисктоячка играет в беззвучном режиме, после сворачивания Safari и возврата трек доигрывается по тапу, марш с речью не замолкает.
