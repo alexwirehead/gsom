@@ -786,8 +786,25 @@
   nextReview(); setInterval(nextReview, 2800);
 
   // ================= ЗВУК =================
-  let ctx = null, muted = false, noiseBuf = null;
+  let ctx = null, muted = false, noiseBuf = null, unlocked = false;
   const live = () => ctx && !muted;
+  // iOS: «playback» — чтобы Web Audio не глушился беззвучкой; после сворачивания, звонка или речи контекст засыпает и его надо будить жестом
+  function unlockAudio() {
+    if (!ctx) {
+      try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (_) {}
+      try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) { return; }
+      ctx.onstatechange = () => {
+        if (ctx.state !== "running") { if (amp.on) ampSleep(); }
+        else if (amp.slept != null && !muted) ampPlay(amp.slept);
+      };
+    }
+    if (ctx.state !== "running") Promise.resolve(ctx.resume()).catch(() => {});
+    if (!unlocked) { unlocked = true; const s = ctx.createBufferSource(); s.buffer = ctx.createBuffer(1, 1, 22050); s.connect(ctx.destination); s.start(0); }
+  }
+  const wake = () => { if (ctx && !muted) unlockAudio(); };
+  document.addEventListener("touchend", wake, { capture: true, passive: true });
+  document.addEventListener("click", wake, true);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && ctx && !muted && ctx.state !== "running") Promise.resolve(ctx.resume()).catch(() => {}); });
 
   function fart(rev) {
     if (!live()) return;
@@ -874,6 +891,7 @@
     if (muted || !("speechSynthesis" in window)) return;
     const u = new SpeechSynthesisUtterance(text.replace(/%username%/gi, "юзернейм"));
     u.lang = "ru-RU"; u.rate = rnd(.8, 1.6); u.pitch = rnd(0, 2);
+    u.onend = () => { if (ctx && !muted && ctx.state !== "running") Promise.resolve(ctx.resume()).catch(() => {}); }; // iOS прерывает Web Audio ради речи
     speechSynthesis.speak(u);
   }
   function randomSound() {
@@ -889,7 +907,7 @@
 
   // ================= УПЧК-АМП (секвенсор) =================
   // Ноты ставятся на ctx.currentTime с упреждением: раз в 25мс планируем всё, что попадает в ближайшие 120мс.
-  const amp = { on: false, ti: 0, step: 0, next: 0, timer: null, gain: null, parts: null, say: 0 };
+  const amp = { on: false, ti: 0, step: 0, next: 0, timer: null, gain: null, parts: null, say: 0, wake: 0, slept: null, lastT: 0, lastAt: 0 };
   const NOTE_IX = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
   const freq = n => { const m = /^([A-G])(#?)(\d)$/.exec(n); return m ? 440 * 2 ** ((NOTE_IX[m[1]] + (m[2] ? 1 : 0) + 12 * (+m[3] + 1) - 69) / 12) : 0; };
   const parsePart = p => p ? p.split(/\s+/).filter(x => x && x !== "|") : null;
@@ -958,6 +976,8 @@
   }
   function ampTick() {
     if (!live()) { ampStop(); return; }
+    if (ctx.currentTime !== amp.lastT) { amp.lastT = ctx.currentTime; amp.lastAt = performance.now(); }
+    else if (performance.now() - amp.lastAt > 1000) { ampSleep(); return; } // время стоит — контекст уснул, а statechange не пришёл
     const tr = TRACKS[amp.ti], sp = 60 / tr.bpm / 4;
     while (amp.next < ctx.currentTime + .12) {
       if (amp.step >= amp.len * (tr.loops || 2)) { // трек доигран: дождаться конца последнего шага и включить следующий
@@ -972,6 +992,15 @@
   function ampPlay(ti) {
     if (!live()) return;
     ampStop(true);
+    if (ctx.state !== "running") { // iOS: сначала разбудить контекст, иначе currentTime стоит и ноты уходят в прошлое
+      const tok = amp.wake, want = ti;
+      ampTitle.textContent = "★ БУДИМ ЗВУК… ★";
+      Promise.resolve(ctx.resume()).catch(() => {}).then(() => {
+        if (tok !== amp.wake) return;
+        if (ctx.state === "running") ampPlay(want); else ampSleep(want);
+      });
+      return;
+    }
     if (!amp.gain) { amp.gain = ctx.createGain(); amp.gain.connect(ctx.destination); }
     amp.gain.gain.cancelScheduledValues(ctx.currentTime);
     amp.gain.gain.setValueAtTime(1, ctx.currentTime);
@@ -980,12 +1009,14 @@
     amp.parts = { melody: parsePart(tr.melody), bass: parsePart(tr.bass), chords: parsePart(tr.chords), drums: parsePart(tr.drums), fx: parsePart(tr.fx) };
     amp.len = Math.max(...Object.values(amp.parts).map(x => x ? x.length : 0));
     amp.on = true; amp.step = 0; amp.say = 0; amp.next = ctx.currentTime + .08;
+    amp.lastT = ctx.currentTime; amp.lastAt = performance.now();
     amp.timer = setInterval(ampTick, 25);
     ampTick();
     ampUI();
   }
   function ampStop(quiet) {
     clearInterval(amp.timer); amp.timer = null;
+    amp.wake++; amp.slept = null;
     if (amp.on && amp.gain && ctx) { // глушим уже запланированные ноты
       amp.gain.gain.cancelScheduledValues(ctx.currentTime);
       amp.gain.gain.setTargetAtTime(0, ctx.currentTime, .02);
@@ -993,6 +1024,12 @@
     }
     amp.on = false;
     if (!quiet) ampUI();
+  }
+  function ampSleep(ti) { // звук уснул: ждём тап, statechange сам доиграет трек
+    if (ti != null) amp.ti = ((ti % TRACKS.length) + TRACKS.length) % TRACKS.length;
+    ampStop();
+    amp.slept = amp.ti;
+    ampTitle.textContent = `★ ЗВУК ПОПЯЧИЛСО — ТЫКНИ ▶ ★ ${TRACKS[amp.ti].name} ★`;
   }
 
   // ================= ВЗРЫВЫ / ЛУЧИ / ПЕЧАТИ =================
@@ -1278,12 +1315,14 @@
 
   // ================= УПЧК-АМП (окно) =================
   const ampTitle = document.getElementById("ampTitle"), ampBtn = document.getElementById("ampPlay");
+  const SILENT_HINT = !navigator.audioSession && matchMedia("(pointer: coarse)").matches; // старый iOS: беззвучку из кода не обойти
   function ampUI() {
-    ampTitle.textContent = `${amp.ti + 1}/${TRACKS.length}. ${TRACKS[amp.ti].name} ★ ${amp.on ? "ИГРАЕТ" : "ПАУЗА"} ★ ${TRACKS[amp.ti].bpm} BPM ★`;
+    ampTitle.textContent = `${amp.ti + 1}/${TRACKS.length}. ${TRACKS[amp.ti].name} ★ ${amp.on ? "ИГРАЕТ" : "ПАУЗА"} ★ ${TRACKS[amp.ti].bpm} BPM ★` + (amp.on && SILENT_HINT ? " НЕ СЛЫШНО? СНИМИ ТЕЛЕФОН С БЕЗЗВУЧКИ ★" : "");
     ampBtn.textContent = amp.on ? "⏸" : "▶";
     document.body.classList.toggle("disco", amp.on);
   }
   document.getElementById("disco").addEventListener("click", () => {
+    wake();
     if (ampWin.hidden) { ampWin.hidden = false; ampPlay(Math.floor(rnd(0, TRACKS.length))); stamp("ДИСКТОЯЧКА!!!11", true); }
     else { ampStop(); ampWin.hidden = true; }
   });
@@ -1296,7 +1335,7 @@
   // ================= СТАРТ / ЗВУК =================
   const start = document.getElementById("start");
   start.addEventListener("click", () => {
-    try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) {}
+    unlockAudio();
     start.remove();
     fart(); speak("великий онотоле! платформа ии ололо");
     setTimeout(loopSounds, 500);
@@ -1311,7 +1350,7 @@
   muteBtn.addEventListener("click", () => {
     muted = !muted;
     if (muted && "speechSynthesis" in window) speechSynthesis.cancel();
-    if (muted) ampStop();
+    if (muted) ampStop(); else wake();
     muteBtn.textContent = muted ? "🔇 тишина" : "🔊 звук";
   });
 
